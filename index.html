@@ -23,10 +23,10 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
-        
+
         /* خلفية الموقع مريحة للعين (أزرق فاتح جداً) */
         body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
-        
+
         .ad-container:empty { display: none !important; }
         .nav-link-active { border-bottom: 3px solid #fbbf24; color: #fbbf24 !important; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -66,7 +66,6 @@
             pointer-events: none;
         }
 
-        /* لون أبيض هادئ للبطاقات بدلاً من الساطع */
         .bg-soft-white { background-color: #fafbfc; }
     </style>
 </head>
@@ -88,7 +87,7 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef } from 'react';
+        import React, { useState, useEffect, useRef, useTransition } from 'react';
         import { createRoot } from 'react-dom/client';
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -174,7 +173,7 @@
         };
 
         const SectionView = ({ type, title, icon, data, hideYearFilter = false, showSystemFilter = false, onBack, onPreviewSingle, onRequestDownload, initialFilters, showToast, highlightedItemId }) => {
-            
+
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'اختار الفرقة');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'اختار النظام'); 
             const[visibleCount, setVisibleCount] = useState(10);
@@ -200,13 +199,14 @@
 
             const visibleData = filtered.slice(0, visibleCount);
 
-            const getThumbnail = (url) => {
+            // تم التعديل لتجنب تصغير الأبعاد بقوة لصور الأنشطة
+            const getThumbnail = (url, isActivity = false) => {
                 if (!url) return 'https://via.placeholder.com/300?text=No+Image';
                 if (url.includes('cloudinary.com')) {
                     if (url.toLowerCase().endsWith('.pdf')) {
                         return url.replace('/upload/', '/upload/w_300,q_auto,f_auto/').replace(/\.pdf$/i, '.jpg');
                     }
-                    return url.replace('/upload/', '/upload/w_300,q_auto,f_auto/');
+                    return url.replace('/upload/', isActivity ? '/upload/q_auto,f_auto/' : '/upload/w_300,q_auto,f_auto/');
                 }
                 return url;
             };
@@ -229,7 +229,7 @@
             const handleShareSection = async () => {
                 const url = new URL(window.location.origin + window.location.pathname);
                 url.searchParams.set('page', type);
-                
+
                 const yMap = {'الفرقة الأولى':'1', 'الفرقة الثانية':'2', 'الفرقة الثالثة':'3', 'الفرقة الرابعة':'4'};
                 const sMap = {'انتظام':'r', 'انتساب':'a'};
 
@@ -270,11 +270,14 @@
                 } catch (e) { console.log("Share failed", e); }
             };
 
-            // تحديد شكل البطاقات بناءً على القسم
             const isA4Card = type === 'lectures' || type === 'notes' || type === 'reviews';
+            const isActivities = type === 'activities';
 
+            // تحديد الـ Layout بناءً على القسم (Masonry للأنشطة)
             let gridClass = "grid gap-3 md:gap-4 ";
-            if (isA4Card) {
+            if (isActivities) {
+                gridClass = "columns-1 sm:columns-2 lg:columns-3 gap-3 space-y-3";
+            } else if (isA4Card) {
                 gridClass += "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
             } else {
                 gridClass += "grid-cols-1 md:grid-cols-2";
@@ -282,7 +285,7 @@
 
             return (
                 <div className="bg-soft-white p-2 md:p-3 rounded-xl shadow-sm border border-blue-900/10">
-                    
+
                     <div className="flex flex-wrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-2">
                         <div className="flex items-center gap-1.5 flex-1 overflow-hidden">
                             <button onClick={onBack} className="text-gray-500 hover:text-blue-900 transition-colors duration-75 bg-gray-100 hover:bg-gray-200 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
@@ -333,88 +336,116 @@
                         {visibleData.length === 0 ? (
                             <div className="col-span-full text-center py-10 text-gray-400 text-sm">لا توجد بيانات متاحة حالياً.</div>
                         ) : (
-                            visibleData.map(item => (
-                                <div key={item.id} id={`card-${item.id}`} className={`p-1.5 md:p-2 border border-blue-900/10 rounded-xl hover:shadow-md transition-shadow duration-75 bg-white relative animate-fade-in flex ${isA4Card ? 'flex-col' : 'flex-col sm:flex-row items-start'} gap-2 overflow-hidden ${highlightedItemId === item.id ? 'highlight-item' : ''}`}>
+                            visibleData.map(item => {
+                                // تصميم عرض الأنشطة بالكامل (Masonry)
+                                if (isActivities) {
+                                    return (
+                                        <div key={item.id} id={`card-${item.id}`} className={`break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow hover:shadow-lg transition-all duration-300 group border border-gray-200 bg-black ${highlightedItemId === item.id ? 'highlight-item' : ''}`} onClick={() => onPreviewSingle(item.fileUrl)}>
+                                            {/* زر المشاركة بالأسفل يسار للصورة */}
+                                            <button onClick={(e) => { e.stopPropagation(); handleShareCard(item); }} className="absolute bottom-3 left-3 bg-white/90 text-blue-900 w-8 h-8 rounded-full flex items-center justify-center shadow-lg z-30 hover:bg-white transition-colors" title="مشاركة الملف">
+                                                <i className="fa-solid fa-share-nodes text-[12px]"></i>
+                                            </button>
 
-                                    {/* زر المشاركة أعلى يسار البطاقة */}
-                                    <button onClick={(e) => { e.stopPropagation(); handleShareCard(item); }} className="absolute top-2 left-2 bg-white/95 text-blue-900 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center shadow border border-gray-100 z-30 hover:bg-gray-100 transition-colors" title="مشاركة الملف">
-                                        <i className="fa-solid fa-share-nodes text-[10px] md:text-[11px]"></i>
-                                    </button>
+                                            <img 
+                                                src={getThumbnail(item.fileUrl, true)} 
+                                                alt={item.title} 
+                                                loading="lazy" 
+                                                className="w-full h-auto object-cover min-h-[150px] opacity-90 group-hover:opacity-100 group-hover:scale-[1.02] transition-all duration-300" 
+                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/300x200?text=Activity' }} 
+                                            />
 
-                                    {/* نظام الدراسة أعلى يمين البطاقة */}
-                                    {showSystemFilter && item.studySystem && item.studySystem !== 'عام' && (
-                                        <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[8px] font-black px-2 py-0.5 rounded-bl-lg rounded-tr-xl z-20 shadow-sm">
-                                            {item.studySystem}
-                                        </div>
-                                    )}
-
-                                    {/* حاوية الصورة تتكيف مع نوع القسم */}
-                                    <div className={`flex-shrink-0 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 relative cursor-pointer flex items-center justify-center ${isA4Card ? 'w-full aspect-[1/1.4] p-0.5' : 'w-full sm:w-1/3 min-h-[100px] p-0.5'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
-                                        <img 
-                                            src={getThumbnail(item.fileUrl)} 
-                                            alt={item.title} 
-                                            loading="lazy" 
-                                            className={`w-full rounded ${isA4Card ? 'h-full object-contain' : 'max-h-48 object-contain'}`} 
-                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=File' }} 
-                                        />
-                                        
-                                        {item.fileUrl?.endsWith('.pdf') && <div className="absolute bottom-1 right-1 bg-red-600 text-white text-[8px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
-                                    </div>
-
-                                    <div className="flex-grow flex flex-col justify-between w-full h-full">
-                                        <div>
-                                            <div className="flex items-center justify-between mb-1 mt-1 sm:mt-0">
-                                                {!hideYearFilter && (
-                                                    <span className="text-[8px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100">{item.year}</span>
-                                                )}
+                                            {/* العنوان والتاريخ كـ Overlay من أعلى الصورة */}
+                                            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/90 via-black/50 to-transparent p-4 pb-12 text-white z-10 pointer-events-none">
+                                                <h4 className="font-bold text-sm md:text-base leading-snug drop-shadow-lg">{item.title}</h4>
                                                 {item.createdAt && (
-                                                    <span className="text-[8px] text-gray-400 font-bold" dir="ltr">
+                                                    <span className="text-[10px] opacity-90 mt-1.5 block drop-shadow-md font-semibold" dir="ltr">
                                                         {formatDate(item.createdAt)}
                                                     </span>
                                                 )}
                                             </div>
-                                            <h4 className={`font-bold text-gray-800 line-clamp-2 leading-tight ${isA4Card ? 'text-[11px]' : 'text-xs md:text-sm'}`}>{item.title}</h4>
-                                            
-                                            {item.description && (
-                                                <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">
-                                                    {item.description}
-                                                </div>
-                                            )}
+                                        </div>
+                                    );
+                                }
+
+                                // التصميم العادي لباقي الأقسام
+                                return (
+                                    <div key={item.id} id={`card-${item.id}`} className={`p-1.5 md:p-2 border border-blue-900/10 rounded-xl hover:shadow-md transition-shadow duration-75 bg-white relative animate-fade-in flex ${isA4Card ? 'flex-col' : 'flex-col sm:flex-row items-start'} gap-2 overflow-hidden ${highlightedItemId === item.id ? 'highlight-item' : ''}`}>
+
+                                        <button onClick={(e) => { e.stopPropagation(); handleShareCard(item); }} className="absolute top-2 left-2 bg-white/95 text-blue-900 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center shadow border border-gray-100 z-30 hover:bg-gray-100 transition-colors" title="مشاركة الملف">
+                                            <i className="fa-solid fa-share-nodes text-[10px] md:text-[11px]"></i>
+                                        </button>
+
+                                        {showSystemFilter && item.studySystem && item.studySystem !== 'عام' && (
+                                            <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[8px] font-black px-2 py-0.5 rounded-bl-lg rounded-tr-xl z-20 shadow-sm">
+                                                {item.studySystem}
+                                            </div>
+                                        )}
+
+                                        <div className={`flex-shrink-0 rounded-lg overflow-hidden border border-gray-100 bg-gray-50 relative cursor-pointer flex items-center justify-center ${isA4Card ? 'w-full aspect-[1/1.4] p-0.5' : 'w-full sm:w-1/3 min-h-[100px] p-0.5'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
+                                            <img 
+                                                src={getThumbnail(item.fileUrl)} 
+                                                alt={item.title} 
+                                                loading="lazy" 
+                                                className={`w-full rounded ${isA4Card ? 'h-full object-contain' : 'max-h-48 object-contain'}`} 
+                                                onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=File' }} 
+                                            />
+                                            {item.fileUrl?.endsWith('.pdf') && <div className="absolute bottom-1 right-1 bg-red-600 text-white text-[8px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
                                         </div>
 
-                                        <div className={`flex flex-col gap-1.5 mt-2`}>
-                                            {/* إخفاء أزرار التحميل والمعاينة في الأقسام العامة (الأنشطة، الوظائف، التدريب) */}
-                                            {isA4Card && item.fileUrl && (
-                                                <>
-                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="w-full bg-blue-50 text-blue-900 text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-blue-100 transition-colors duration-75 flex items-center justify-center gap-1 border border-blue-100">
-                                                        <i className="fa-solid fa-eye"></i> معاينة
-                                                    </button>
-                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="w-full bg-blue-900 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-blue-800 transition-colors duration-75 flex items-center justify-center gap-1">
-                                                        <i className="fa-solid fa-download"></i> تحميل
-                                                    </button>
-                                                </>
-                                            )}
-
-                                            {item.link && (
-                                                <a href={item.link} target="_blank" className="w-full bg-red-50 text-red-700 text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-red-100 transition-colors duration-75 truncate flex items-center justify-center gap-1 border border-red-100">
-                                                    <i className="fa-brands fa-youtube"></i> عرض الرابط
-                                                </a>
-                                            )}
-
-                                            {item.phone && (
-                                                <div className="w-full flex gap-1.5">
-                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-green-600 transition-colors duration-75 flex items-center justify-center gap-1">
-                                                        <i className="fa-brands fa-whatsapp"></i> واتساب
-                                                    </a>
-                                                    <a href={`tel:${item.phone}`} className="flex-1 bg-gray-800 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-gray-900 transition-colors duration-75 flex items-center justify-center gap-1">
-                                                        <i className="fa-solid fa-phone"></i> اتصال
-                                                    </a>
+                                        <div className="flex-grow flex flex-col justify-between w-full h-full">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-1 mt-1 sm:mt-0">
+                                                    {!hideYearFilter && (
+                                                        <span className="text-[8px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100">{item.year}</span>
+                                                    )}
+                                                    {item.createdAt && (
+                                                        <span className="text-[8px] text-gray-400 font-bold" dir="ltr">
+                                                            {formatDate(item.createdAt)}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                            )}
+                                                <h4 className={`font-bold text-gray-800 line-clamp-2 leading-tight ${isA4Card ? 'text-[11px]' : 'text-xs md:text-sm'}`}>{item.title}</h4>
+
+                                                {item.description && (
+                                                    <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">
+                                                        {item.description}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className={`flex flex-col gap-1.5 mt-2`}>
+                                                {isA4Card && item.fileUrl && (
+                                                    <>
+                                                        <button onClick={() => onPreviewSingle(item.fileUrl)} className="w-full bg-blue-50 text-blue-900 text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-blue-100 transition-colors duration-75 flex items-center justify-center gap-1 border border-blue-100">
+                                                            <i className="fa-solid fa-eye"></i> معاينة
+                                                        </button>
+                                                        <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="w-full bg-blue-900 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-blue-800 transition-colors duration-75 flex items-center justify-center gap-1">
+                                                            <i className="fa-solid fa-download"></i> تحميل
+                                                        </button>
+                                                    </>
+                                                )}
+
+                                                {item.link && (
+                                                    <a href={item.link} target="_blank" className="w-full bg-red-50 text-red-700 text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-red-100 transition-colors duration-75 truncate flex items-center justify-center gap-1 border border-red-100">
+                                                        <i className="fa-brands fa-youtube"></i> عرض الرابط
+                                                    </a>
+                                                )}
+
+                                                {item.phone && (
+                                                    <div className="w-full flex gap-1.5">
+                                                        <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-green-600 transition-colors duration-75 flex items-center justify-center gap-1">
+                                                            <i className="fa-brands fa-whatsapp"></i> واتساب
+                                                        </a>
+                                                        <a href={`tel:${item.phone}`} className="flex-1 bg-gray-800 text-white text-[9px] py-1.5 px-2 rounded font-bold text-center hover:bg-gray-900 transition-colors duration-75 flex items-center justify-center gap-1">
+                                                            <i className="fa-solid fa-phone"></i> اتصال
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
 
@@ -438,11 +469,12 @@
             const[materials, setMaterials] = useState([]);
             const[schedules, setSchedules] = useState([]);
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
             const[previewData, setPreviewData] = useState({ items:[], index: -1 });
             const[downloadItem, setDownloadItem] = useState(null); 
-
             const[toast, setToast] = useState({ message: '', type: '' });
+            
+            // استخدام useTransition لمنع اللاج أثناء الانتقال بين الأقسام الثقيلة مثل المذكرات
+            const [isPending, startTransition] = useTransition();
 
             const showToast = (message, type = 'info', duration = 2500) => {
                 setToast({ message, type });
@@ -524,7 +556,7 @@
                 const params = new URLSearchParams(window.location.search);
                 const pageParam = params.get('page');
                 const itemParam = params.get('item');
-                
+
                 const resolveYear = (val) => {
                     if(!val) return 'اختار الفرقة';
                     if(val === '1') return 'الفرقة الأولى';
@@ -548,7 +580,7 @@
                         year: resolveYear(params.get('y') || params.get('year')),
                         system: resolveSystem(params.get('s') || params.get('system'))
                     });
-                    
+
                     if(itemParam) {
                         setHighlightedItemId(itemParam);
                         setTimeout(() => {
@@ -604,11 +636,14 @@
 
             const getByType = (type) => materials.filter(m => m.sectionType === type).sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+            // التنقل باستخدام startTransition لمنع اللاج والتجمد
             const navigate = (pg) => {
-                setPage(pg);
                 setIsMobileMenuOpen(false);
                 setHighlightedItemId(null);
                 window.scrollTo(0,0);
+                startTransition(() => {
+                    setPage(pg);
+                });
             };
 
             return (
@@ -669,12 +704,13 @@
                     </nav>
 
                     <div className={`fixed inset-0 bg-black/50 z-[100] transition-opacity duration-75 lg:hidden ${isMobileMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={() => setIsMobileMenuOpen(false)}></div>
-                    <div className={`fixed top-0 right-0 h-full w-56 md:w-64 bg-soft-white z-[101] shadow-2xl transform transition-transform duration-100 ease-out lg:hidden flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                        <div className="bg-blue-900 text-white p-3 md:p-4 flex justify-between items-center border-b-2 border-yellow-500">
+                    
+                    {/* تعديل القائمة الجانبية لتنتهي بعد المحتوى مباشرة عبر h-fit و rounded-bl-3xl */}
+                    <div className={`fixed top-0 right-0 max-h-[100dvh] h-fit pb-3 rounded-bl-3xl w-56 md:w-64 bg-soft-white z-[101] shadow-2xl transform transition-transform duration-100 ease-out lg:hidden flex flex-col ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                        <div className="bg-blue-900 text-white p-3 md:p-4 flex justify-between items-center border-b-2 border-yellow-500 rounded-bl-sm">
                             <span className="font-bold text-sm md:text-base">القائمة</span>
                             <button onClick={() => setIsMobileMenuOpen(false)} className="text-lg md:text-xl"><i className="fa-solid fa-xmark"></i></button>
                         </div>
-                        {/* تصغير أحجام القائمة الجانبية */}
                         <div className="flex flex-col p-3 gap-1.5 overflow-y-auto sidebar-scroll">
                             <SidebarBtn icon="fa-house" label="الرئيسية" active={page==='home'} onClick={() => navigate('home')} />
                             <SidebarBtn icon="fa-person-chalkboard" label="المحاضرات" active={page==='lectures'} onClick={() => navigate('lectures')} />
@@ -693,14 +729,21 @@
                                 تنظيف الموقع
                             </button>
 
-                            <button onClick={() => {navigate(isAdmin ? 'adminDash' : 'admin'); setIsMobileMenuOpen(false);}} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg transition-all duration-75 font-black text-[10px] md:text-xs bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 shadow-sm mt-1 border border-yellow-600">
+                            <button onClick={() => navigate(isAdmin ? 'adminDash' : 'admin')} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg transition-all duration-75 font-black text-[10px] md:text-xs bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 shadow-sm mt-1 border border-yellow-600">
                                 <i className={`fa-solid ${isAdmin ? 'fa-user-shield' : 'fa-right-to-bracket'}`}></i>
                                 {isAdmin ? 'الإدارة' : 'تسجيل الدخول'}
                             </button>
                         </div>
                     </div>
 
-                    <main className="flex-grow container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-5xl">
+                    <main className="flex-grow container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-5xl relative">
+                        {/* إظهار علامة تحميل بسيطة في حال التنقل لتجنب شعور اللاج */}
+                        {isPending && (
+                            <div className="absolute top-10 left-1/2 -translate-x-1/2 z-10 bg-blue-900 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg opacity-80 flex items-center gap-2">
+                                <i className="fa-solid fa-spinner fa-spin"></i> جاري التجهيز...
+                            </div>
+                        )}
+
                         <AdSlot id="top-ad" />
 
                         {page === 'home' && (
@@ -738,7 +781,7 @@
                         {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
 
                         {page === 'about' && <AboutPage onBack={() => navigate('home')} />}
-                        {page === 'admin' && !isAdmin && <AdminLogin onSuccess={() => { showToast("تم تسجيل الدخول بنجاح", "success"); setPage('adminDash'); }} showToast={showToast} />}
+                        {page === 'admin' && !isAdmin && <AdminLogin onSuccess={() => { showToast("تم تسجيل الدخول بنجاح", "success"); navigate('adminDash'); }} showToast={showToast} />}
                         {page === 'adminDash' && isAdmin && <AdminDashboard materials={materials} schedules={schedules} onBack={() => navigate('home')} showToast={showToast} />}
 
                         <AdSlot id="bottom-ad" />
@@ -846,9 +889,13 @@
 
             const[confirmDelete, setConfirmDelete] = useState(null);
 
+            // تعديل لتفريغ حقل العنوان للصور والفيديوهات فقط
             const handleFileChange = (e) => {
                 const files = Array.from(e.target.files);
-                setUploadQueue(files.map(f => ({ file: f, title: f.name.split('.')[0] })));
+                setUploadQueue(files.map(f => {
+                    const isMedia = f.type.startsWith('image/') || f.type.startsWith('video/');
+                    return { file: f, title: isMedia ? '' : f.name.split('.')[0] };
+                }));
             };
 
             const uploadFileWithProgress = (file, isCompressed) => {
@@ -883,10 +930,16 @@
                     const finalStudySystem = (sec === 'lectures' || sec === 'notes' || sec === 'reviews') ? studySystem : 'عام';
 
                     if (uploadQueue.length > 0) {
+                        // التأكد من أن جميع الحقول تحتوي على عنوان للملفات المحددة
+                        const hasEmptyTitles = uploadQueue.some(item => !item.title || !item.title.trim());
+                        if (hasEmptyTitles) {
+                            showToast("الرجاء كتابة وصف/عنوان لجميع الملفات المحددة", "error");
+                            setLoading(false);
+                            return;
+                        }
+
                         for (let i=0; i<uploadQueue.length; i++) {
                             const item = uploadQueue[i];
-                            if (!item.title) continue;
-
                             setUploadProgress(0);
 
                             let fileUrl = null;
@@ -895,13 +948,15 @@
                             let isCompressed = false;
 
                             if (fileToUpload.type.startsWith('image/')) {
-                                if (fileToUpload.size > 1024 * 1024) { 
+                                if (fileToUpload.size > 500 * 1024) { 
                                     showToast(`جاري ضغط الصورة (${i+1}/${uploadQueue.length})...`, "info", 0);
                                     try {
+                                        // تسريع عملية الضغط بتخفيض الحدود القصوى
                                         fileToUpload = await imageCompression(fileToUpload, { 
-                                            maxSizeMB: 1.5, 
-                                            maxWidthOrHeight: 1920, 
+                                            maxSizeMB: 1, 
+                                            maxWidthOrHeight: 1280, 
                                             useWebWorker: true,
+                                            initialQuality: 0.7,
                                             onProgress: (p) => setUploadProgress(Math.floor(p * 0.4)) 
                                         });
                                         isCompressed = true;
@@ -934,7 +989,7 @@
                             }
                         }
                     } else {
-                        if (!title) { showToast("اكتب العنوان أولاً", "error"); setLoading(false); return; }
+                        if (!title) { showToast("الرجاء كتابة العنوان أولاً", "error"); setLoading(false); return; }
                         showToast("جاري النشر...", "info", 0);
                         await addDoc(collection(db, 'materials'), { 
                             title: title, fileUrl: null, sectionType: sec, 
@@ -1011,7 +1066,7 @@
 
                         {sec === 'training' && <input placeholder="رابط خارجي (مثال: يوتيوب)" value={link} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white" onChange={v=>setLink(v.target.value)} />}
                         {sec === 'jobs' && <input placeholder="رقم الهاتف (للتواصل واتساب/اتصال)" value={phone} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white" onChange={v=>setPhone(v.target.value)} />}
-                        
+
                         {sec === 'jobs' && <textarea placeholder="اكتب تفاصيل ووصف الوظيفة هنا..." value={description} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white col-span-1 md:col-span-2" rows="3" onChange={v=>setDescription(v.target.value)}></textarea>}
 
                         <div className="flex flex-col col-span-1 md:col-span-2 border-t border-gray-100 pt-3 mt-1">
@@ -1029,7 +1084,7 @@
                                 {uploadQueue.map((item, idx) => (
                                     <div key={idx} className="flex flex-col sm:flex-row items-center gap-1.5 bg-white p-1.5 rounded border border-gray-200">
                                         <span className="text-[10px] text-gray-500 w-full sm:w-1/3 truncate" dir="ltr">{item.file.name}</span>
-                                        <input className="border border-gray-200 p-1.5 rounded w-full sm:w-2/3 text-xs focus:outline-none focus:border-blue-900 font-bold bg-gray-50" value={item.title} placeholder="اكتب العنوان أو الوصف هنا..." onChange={(e) => { const newQ = [...uploadQueue]; newQ[idx].title = e.target.value; setUploadQueue(newQ); }} />
+                                        <input className={`border border-gray-200 p-1.5 rounded w-full sm:w-2/3 text-xs focus:outline-none focus:border-blue-900 font-bold bg-gray-50 ${!item.title ? 'border-red-400' : ''}`} value={item.title} placeholder="اكتب العنوان أو الوصف هنا..." onChange={(e) => { const newQ = [...uploadQueue]; newQ[idx].title = e.target.value; setUploadQueue(newQ); }} />
                                     </div>
                                 ))}
                             </div>
