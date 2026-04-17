@@ -849,35 +849,39 @@
                                 </div>
 
                                 <HomeSlider schedules={schedules} onPreviewSlider={openSliderPreview} />
+{page === 'home' && (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    
+    {/* بطاقة موقع الخدمات أولاً (تأخذ حجم بطاقتين) */} 
+    <div 
+      onClick={() => setExternalSiteOpen(true)} 
+      className="col-span-2 md:col-span-2 bg-gradient-to-r from-blue-800 to-indigo-900 p-3 md:p-4 rounded-xl text-white flex items-center gap-3 shadow-md hover:shadow-lg cursor-pointer border border-blue-400/30 transition-all group" 
+    > 
+      <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform"> 
+        <i className="fa-solid fa-graduation-cap text-lg md:text-xl"></i> 
+      </div> 
+      <div className="flex flex-col justify-center"> 
+        <h3 className="font-black text-xs md:text-sm drop-shadow-md leading-tight mb-1">
+          موقع خدمات طلاب كلية تجارة الزقازيق
+        </h3> 
+        <p className="text-[9px] md:text-[11px] text-blue-200 font-bold bg-black/20 w-fit px-2 py-0.5 rounded-full"> 
+          اضغط لفتح الموقع 
+        </p> 
+      </div> 
+    </div> 
 
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                                    <HomeCard icon="fa-person-chalkboard" label="المحاضرات" color="bg-blue-600" onClick={() => navigate('lectures')} />
-                                    <HomeCard icon="fa-book" label="المذكرات" color="bg-indigo-600" onClick={() => navigate('notes')} />
-                                    <HomeCard icon="fa-file-shield" label="المراجعات" color="bg-red-600" onClick={() => navigate('reviews')} />
-                                    <HomeCard icon="fa-users-gear" label="الأنشطة" color="bg-green-600" onClick={() => navigate('activities')} />
-                                    <HomeCard icon="fa-graduation-cap" label="التدريب" color="bg-orange-600" onClick={() => navigate('training')} />
-                                    <HomeCard icon="fa-briefcase" label="الوظائف" color="bg-cyan-600" onClick={() => navigate('jobs')} />
-                                    <HomeCard icon="fa-map-location" label="دليل الطالب" color="bg-gray-600" onClick={() => navigate('guide')} />
-                                    <HomeCard icon="fa-circle-info" label="من نحن" color="bg-gray-600" onClick={() => navigate('about')} />
-                                    
-                                    {/* بطاقة موقع الخدمات (بحجم بطاقتين) تفتح في المتصفح الداخلي */}
-                                    <div 
-                                        onClick={() => setExternalSiteOpen(true)}
-                                        className="col-span-2 md:col-span-2 bg-gradient-to-r from-blue-800 to-indigo-900 p-3 md:p-4 rounded-xl text-white flex items-center gap-3 shadow-md hover:shadow-lg cursor-pointer border border-blue-400/30 transition-all group"
-                                    >
-                                        <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform">
-                                            <i className="fa-solid fa-graduation-cap text-lg md:text-xl"></i>
-                                        </div>
-                                        <div className="flex flex-col justify-center">
-                                            <h3 className="font-black text-xs md:text-sm drop-shadow-md leading-tight mb-1">موقع خدمات طلاب كلية تجارة الزقازيق</h3>
-                                            <p className="text-[9px] md:text-[11px] text-blue-200 font-bold bg-black/20 w-fit px-2 py-0.5 rounded-full">
-                                                اضغط لفتح الموقع
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+    {/* باقي البطاقات */} 
+    <HomeCard icon="fa-person-chalkboard" label="المحاضرات" color="bg-blue-600" onClick={() => navigate('lectures')} /> 
+    <HomeCard icon="fa-book" label="المذكرات" color="bg-indigo-600" onClick={() => navigate('notes')} /> 
+    <HomeCard icon="fa-file-shield" label="المراجعات" color="bg-red-600" onClick={() => navigate('reviews')} /> 
+    <HomeCard icon="fa-users-gear" label="الأنشطة" color="bg-green-600" onClick={() => navigate('activities')} /> 
+    <HomeCard icon="fa-graduation-cap" label="التدريب" color="bg-orange-600" onClick={() => navigate('training')} /> 
+    <HomeCard icon="fa-briefcase" label="الوظائف" color="bg-cyan-600" onClick={() => navigate('jobs')} /> 
+    <HomeCard icon="fa-map-location" label="دليل الطالب" color="bg-gray-600" onClick={() => navigate('guide')} /> 
+    <HomeCard icon="fa-circle-info" label="من نحن" color="bg-gray-600" onClick={() => navigate('about')} /> 
+  </div>
+)}
+
 
                         {page === 'lectures' && <SectionView type="lectures" title="قسم المحاضرات" icon="fa-person-chalkboard" data={getByType('lectures')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'notes' && <SectionView type="notes" title="قسم المذكرات" icon="fa-book" data={getByType('notes')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
