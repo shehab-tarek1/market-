@@ -39,14 +39,20 @@
         }
         .animate-toast { animation: slideDownFade 0.15s ease-out forwards; }
 
-        /* تأثير الظهور السلس للعناصر لمنع الإحساس باللاج */
+        /* تأثير الظهور السلس */
         @keyframes fadeInItem {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeInItem 0.2s ease-out forwards; }
 
-        /* شاشة التحميل الأصلية */
+        /* تأثير التظليل عند فتح رابط لبطاقة معينة */
+        @keyframes highlightCard {
+            0% { box-shadow: 0 0 0 4px #fbbf24; background-color: #fef3c7; }
+            100% { box-shadow: 0 0 0 0 transparent; background-color: #f9fafb; }
+        }
+        .highlight-item { animation: highlightCard 3s ease-out forwards; }
+
         #native-splash {
             position: fixed; inset: 0; z-index: 999999;
             background: linear-gradient(135deg, #1e3a8a 0%, #475569 100%);
@@ -62,7 +68,6 @@
 </head>
 <body class="pb-20 lg:pb-0">
 
-    <!-- شاشة التحميل الفورية -->
     <div id="native-splash">
         <div style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center;">
             <div style="width:64px; height:64px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#1e3a8a; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); margin-bottom:16px;">
@@ -103,7 +108,6 @@
         const UPLOAD_PRESET = 'my_public_preset';
         const ADMIN_UID = 'mEVbroYWf7cg68SL8CB2uUS8XhZ2';
 
-        // --- Toast Component ---
         const Toast = ({ message, type }) => {
             if (!message) return null;
             const bgClass = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-blue-800';
@@ -117,7 +121,6 @@
             );
         };
 
-        // --- Internal Preview Modal ---
         const PreviewModal = ({ previewData, onClose, onNavigate }) => {
             useEffect(() => {
                 if (previewData.items.length > 0) document.body.style.overflow = 'hidden';
@@ -159,7 +162,6 @@
             );
         };
 
-        // --- Ad Component ---
         const AdSlot = ({ id }) => {
             const adRef = useRef(null);
             const[hasAd, setHasAd] = useState(false);
@@ -167,8 +169,7 @@
             return <div ref={adRef} className={`ad-container w-full transition-all duration-75 ${hasAd ? 'my-6 py-4 bg-gray-50 border' : 'h-0 overflow-hidden'}`}></div>;
         };
 
-        // --- Dynamic Section Component ---
-        const SectionView = ({ type, title, icon, data, hideYearFilter = false, showSystemFilter = false, onBack, onPreviewSingle, onRequestDownload, initialFilters, showToast }) => {
+        const SectionView = ({ type, title, icon, data, hideYearFilter = false, showSystemFilter = false, onBack, onPreviewSingle, onRequestDownload, initialFilters, showToast, highlightedItemId }) => {
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'الكل');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'الكل'); 
             const[visibleCount, setVisibleCount] = useState(10);
@@ -182,6 +183,16 @@
                 const matchSystem = !showSystemFilter || filterSystem === 'الكل' || itemSystem === 'عام' || itemSystem === filterSystem;
                 return matchYear && matchSystem;
             });
+
+            // التأكد من أن العنصر المظلل يظهر حتى لو كان ترتيبه بعد الـ 10 الأوائل
+            useEffect(() => {
+                if(highlightedItemId) {
+                    const itemIndex = filtered.findIndex(i => i.id === highlightedItemId);
+                    if(itemIndex >= visibleCount) {
+                        setVisibleCount(itemIndex + 10);
+                    }
+                }
+            }, [highlightedItemId, filtered]);
 
             const visibleData = filtered.slice(0, visibleCount);
 
@@ -222,18 +233,23 @@
                         await navigator.share({ title: `قسم ${title} - كلية التجارة`, url: url.toString() });
                     } else {
                         await navigator.clipboard.writeText(url.toString());
-                        showToast("تم نسخ رابط القسم متضمناً الفلتر الحالي", "success");
+                        showToast("تم نسخ رابط القسم", "success");
                     }
                 } catch (e) { console.log("Share failed", e); }
             };
 
             const handleShareCard = async (item) => {
-                const linkToShare = item.fileUrl || item.link || window.location.href;
+                // توليد رابط يوجه المستخدم للموقع مباشرة وليس لـ Cloudinary
+                const url = new URL(window.location.origin + window.location.pathname);
+                url.searchParams.set('page', type);
+                url.searchParams.set('item', item.id);
+                const linkToShare = url.toString();
+
                 try {
                     if (navigator.share) {
                         await navigator.share({
                             title: item.title,
-                            text: `شاهد ملف: ${item.title} - كلية التجارة`,
+                            text: `شاهد: ${item.title} - كلية التجارة`,
                             url: linkToShare
                         });
                     } else {
@@ -243,81 +259,82 @@
                 } catch (e) { console.log("Share failed", e); }
             };
 
-            // تحديد ما إذا كانت البطاقات طولية (للمذكرات والمحاضرات)
             const isVerticalCard = type === 'lectures' || type === 'notes';
             const isLargeImg = type === 'activities' || type === 'jobs' || type === 'guide' || type === 'training';
+            const isCoverImage = isVerticalCard || type === 'activities';
 
-            // تحديد شكل حاوية الصورة بناءً على نوع البطاقة
             let imgContainerClass = "";
             if (isVerticalCard) {
-                imgContainerClass = "w-full h-48 md:h-56 flex-shrink-0 rounded-lg overflow-hidden border bg-white relative cursor-pointer p-1.5";
+                imgContainerClass = "w-full h-48 md:h-56 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-white relative cursor-pointer p-1";
             } else {
                 imgContainerClass = isLargeImg 
-                    ? "w-full sm:w-40 h-48 sm:h-40 flex-shrink-0 rounded-lg overflow-hidden border bg-white relative cursor-pointer p-1.5" 
-                    : "w-full sm:w-28 h-36 sm:h-28 flex-shrink-0 rounded-lg overflow-hidden border bg-white relative cursor-pointer p-1.5";
+                    ? "w-full sm:w-40 h-48 sm:h-40 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-white relative cursor-pointer p-1" 
+                    : "w-full sm:w-28 h-36 sm:h-28 flex-shrink-0 rounded-lg overflow-hidden border border-gray-200 bg-white relative cursor-pointer p-1";
             }
 
             return (
-                <div className="bg-white p-3 md:p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div className="flex items-center justify-between mb-3 border-b pb-2">
-                        <div className="flex items-center gap-2">
-                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 transition-colors duration-75 bg-gray-100 hover:bg-gray-200 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i className="fa-solid fa-arrow-right text-sm"></i>
+                <div className="bg-white p-2 md:p-3 rounded-xl shadow-sm border border-gray-100">
+                    {/* تصغير حجم الهيدر والأزرار */}
+                    <div className="flex items-center justify-between mb-2 border-b pb-1.5">
+                        <div className="flex items-center gap-1.5">
+                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 transition-colors duration-75 bg-gray-100 hover:bg-gray-200 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i className="fa-solid fa-arrow-right text-[10px]"></i>
                             </button>
-                            <div className="text-blue-900 text-lg"><i className={`fa-solid ${icon}`}></i></div>
-                            <h2 className="text-sm md:text-base font-black text-gray-800">{title}</h2>
+                            <div className="text-blue-900 text-sm"><i className={`fa-solid ${icon}`}></i></div>
+                            <h2 className="text-xs md:text-sm font-black text-gray-800">{title}</h2>
                         </div>
-                        <button onClick={handleShareSection} className="bg-gray-100 text-blue-900 hover:bg-blue-100 px-2 py-1 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1 shadow-sm border border-gray-200">
+                        <button onClick={handleShareSection} className="bg-gray-100 text-blue-900 hover:bg-blue-100 px-1.5 py-0.5 rounded text-[9px] font-bold transition-colors flex items-center gap-1 border border-gray-200">
                             <i className="fa-solid fa-share-nodes"></i> مشاركة
                         </button>
                     </div>
 
-                    {/* الفلاتر بحجم مصغر */}
+                    {/* تصغير حجم الفلاتر */}
                     {(!hideYearFilter || showSystemFilter) && (
-                        <div className="flex flex-wrap items-center gap-3 mb-3 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                        <div className="flex flex-wrap items-center gap-2 mb-3 bg-gray-50 p-1.5 rounded border border-gray-200">
                             {!hideYearFilter && (
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-bold text-gray-600">المرحلة:</span>
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[9px] font-bold text-gray-600">المرحلة:</span>
                                     <div className="relative">
                                         <select 
                                             value={filterYear} 
                                             onChange={(e) => {setFilterYear(e.target.value); setVisibleCount(10);}} 
-                                            className="appearance-none bg-blue-900 text-white text-[10px] font-bold rounded pl-6 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800"
+                                            className="appearance-none bg-blue-900 text-white text-[9px] font-bold rounded pl-5 pr-1.5 py-0.5 outline-none cursor-pointer shadow-sm border border-blue-800"
                                         >
                                             {years.map(y => <option key={y} value={y}>{y}</option>)}
                                         </select>
-                                        <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                        <i className="fa-solid fa-chevron-down absolute left-1 top-1/2 -translate-y-1/2 text-white text-[7px] pointer-events-none"></i>
                                     </div>
                                 </div>
                             )}
 
                             {showSystemFilter && (
-                                <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] font-bold text-gray-600">النظام:</span>
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[9px] font-bold text-gray-600">النظام:</span>
                                     <div className="relative">
                                         <select 
                                             value={filterSystem} 
                                             onChange={(e) => {setFilterSystem(e.target.value); setVisibleCount(10);}} 
-                                            className="appearance-none bg-blue-900 text-white text-[10px] font-bold rounded pl-6 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800"
+                                            className="appearance-none bg-blue-900 text-white text-[9px] font-bold rounded pl-5 pr-1.5 py-0.5 outline-none cursor-pointer shadow-sm border border-blue-800"
                                         >
                                             {systems.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
-                                        <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                        <i className="fa-solid fa-chevron-down absolute left-1 top-1/2 -translate-y-1/2 text-white text-[7px] pointer-events-none"></i>
                                     </div>
                                 </div>
                             )}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                         {visibleData.length === 0 ? (
-                            <div className="col-span-full text-center py-10 text-gray-400">لا توجد بيانات متاحة حالياً.</div>
+                            <div className="col-span-full text-center py-10 text-gray-400 text-sm">لا توجد بيانات متاحة حالياً.</div>
                         ) : (
                             visibleData.map(item => (
-                                <div key={item.id} className={`p-3 border-2 border-blue-900 rounded-xl hover:shadow-md transition-shadow duration-75 bg-gray-50 relative animate-fade-in flex ${isVerticalCard ? 'flex-col' : 'flex-col sm:flex-row'} gap-4`}>
+                                /* تقليل سمك الإطار وجعله شبه شفاف */
+                                <div key={item.id} id={`card-${item.id}`} className={`p-2 border border-blue-900/20 rounded-xl hover:shadow-md transition-shadow duration-75 bg-gray-50 relative animate-fade-in flex ${isVerticalCard ? 'flex-col' : 'flex-col sm:flex-row'} gap-3 ${highlightedItemId === item.id ? 'highlight-item' : ''}`}>
 
                                     {showSystemFilter && item.studySystem && item.studySystem !== 'عام' && (
-                                        <div className="absolute top-0 left-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-2 py-0.5 rounded-br-lg rounded-tl-xl z-20">
+                                        <div className="absolute top-0 left-0 bg-yellow-400 text-blue-900 text-[8px] font-black px-1.5 py-0.5 rounded-br-lg rounded-tl-xl z-20">
                                             {item.studySystem}
                                         </div>
                                     )}
@@ -327,20 +344,19 @@
                                             src={getThumbnail(item.fileUrl)} 
                                             alt={item.title} 
                                             loading="lazy" 
-                                            className={`w-full h-full rounded ${isVerticalCard ? 'object-cover' : 'object-contain'}`} 
+                                            className={`w-full h-full rounded ${isCoverImage ? 'object-cover' : 'object-contain'}`} 
                                             onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=File' }} 
                                         />
                                         
-                                        {item.fileUrl?.endsWith('.pdf') && <div className="absolute top-1 right-1 bg-red-600 text-white text-[10px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
+                                        {item.fileUrl?.endsWith('.pdf') && <div className="absolute top-1 right-1 bg-red-600 text-white text-[9px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
                                     </div>
 
                                     <div className="flex-grow flex flex-col justify-between">
                                         <div>
-                                            {/* التاريخ والفرقة أسفل الصورة وأعلى العنوان */}
                                             <div className="flex items-center justify-between mb-1 mt-1 sm:mt-0">
-                                                <div className="flex gap-2">
+                                                <div className="flex gap-1.5">
                                                     {!hideYearFilter && (
-                                                        <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">{item.year}</span>
+                                                        <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">{item.year}</span>
                                                     )}
                                                 </div>
                                                 {item.createdAt && (
@@ -349,38 +365,45 @@
                                                     </span>
                                                 )}
                                             </div>
-                                            <h4 className="font-bold text-gray-800 text-sm md:text-base line-clamp-2">{item.title}</h4>
+                                            <h4 className="font-bold text-gray-800 text-xs md:text-sm line-clamp-2 leading-tight">{item.title}</h4>
+                                            
+                                            {/* إضافة حقل وصف الوظيفة القابل للتمرير */}
+                                            {item.description && (
+                                                <div className="mt-2 text-[10px] text-gray-600 bg-white border border-gray-200 p-1.5 rounded-lg h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">
+                                                    {item.description}
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="flex flex-wrap gap-2 mt-3">
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
                                             {item.fileUrl && (
                                                 <>
-                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-100 text-blue-900 text-xs py-1.5 px-2 rounded-lg font-bold text-center hover:bg-blue-200 transition-colors duration-75">
-                                                        <i className="fa-solid fa-eye ml-1"></i> معاينة
+                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-100 text-blue-900 text-[10px] py-1 px-1.5 rounded font-bold text-center hover:bg-blue-200 transition-colors duration-75">
+                                                        <i className="fa-solid fa-eye ml-0.5"></i> معاينة
                                                     </button>
-                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-xs py-1.5 px-2 rounded-lg font-bold text-center hover:bg-blue-800 transition-colors duration-75">
-                                                        <i className="fa-solid fa-download ml-1"></i> تحميل
+                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1 px-1.5 rounded font-bold text-center hover:bg-blue-800 transition-colors duration-75">
+                                                        <i className="fa-solid fa-download ml-0.5"></i> تحميل
                                                     </button>
                                                 </>
                                             )}
 
                                             {item.link && (
-                                                <a href={item.link} target="_blank" className="flex-1 bg-red-100 text-red-700 text-xs py-1.5 px-2 rounded-lg font-bold text-center hover:bg-red-200 transition-colors duration-75">
-                                                    <i className="fa-brands fa-youtube ml-1"></i> عرض الرابط
+                                                <a href={item.link} target="_blank" className="flex-1 bg-red-100 text-red-700 text-[10px] py-1 px-1.5 rounded font-bold text-center hover:bg-red-200 transition-colors duration-75 truncate">
+                                                    <i className="fa-brands fa-youtube ml-0.5"></i> عرض الرابط
                                                 </a>
                                             )}
 
-                                            <button onClick={() => handleShareCard(item)} className="bg-gray-200 text-gray-800 text-xs py-1.5 px-3 rounded-lg font-bold text-center hover:bg-gray-300 transition-colors duration-75 flex items-center justify-center shadow-sm" title="مشاركة الملف">
+                                            <button onClick={() => handleShareCard(item)} className="bg-gray-200 text-gray-800 text-[10px] py-1 px-2.5 rounded font-bold text-center hover:bg-gray-300 transition-colors duration-75 flex items-center justify-center shadow-sm" title="مشاركة الملف">
                                                 <i className="fa-solid fa-share-nodes"></i>
                                             </button>
 
                                             {item.phone && (
-                                                <div className="w-full flex gap-2 mt-1">
-                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-xs py-1.5 px-2 rounded-lg font-bold text-center hover:bg-green-600 transition-colors duration-75">
-                                                        <i className="fa-brands fa-whatsapp ml-1"></i> واتساب
+                                                <div className="w-full flex gap-1.5 mt-0.5">
+                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1 px-1.5 rounded font-bold text-center hover:bg-green-600 transition-colors duration-75">
+                                                        <i className="fa-brands fa-whatsapp ml-0.5"></i> واتساب
                                                     </a>
-                                                    <a href={`tel:${item.phone}`} className="flex-1 bg-gray-800 text-white text-xs py-1.5 px-2 rounded-lg font-bold text-center hover:bg-gray-900 transition-colors duration-75">
-                                                        <i className="fa-solid fa-phone ml-1"></i> اتصال
+                                                    <a href={`tel:${item.phone}`} className="flex-1 bg-gray-800 text-white text-[10px] py-1 px-1.5 rounded font-bold text-center hover:bg-gray-900 transition-colors duration-75">
+                                                        <i className="fa-solid fa-phone ml-0.5"></i> اتصال
                                                     </a>
                                                 </div>
                                             )}
@@ -392,8 +415,8 @@
                     </div>
 
                     {visibleCount < filtered.length && (
-                        <div className="text-center mt-6">
-                            <button onClick={() => setVisibleCount(prev => prev + 10)} className="bg-gray-200 text-gray-800 px-6 py-2 rounded-full font-bold text-sm hover:bg-gray-300 transition-colors duration-75 border border-gray-300">
+                        <div className="text-center mt-4">
+                            <button onClick={() => setVisibleCount(prev => prev + 10)} className="bg-gray-100 text-gray-700 px-4 py-1.5 rounded-full font-bold text-xs hover:bg-gray-200 transition-colors duration-75 border border-gray-300">
                                 عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i>
                             </button>
                         </div>
@@ -407,6 +430,7 @@
             const[isAdmin, setIsAdmin] = useState(false);
             const[page, setPage] = useState('home');
             const[initialFilters, setInitialFilters] = useState({ year: 'الكل', system: 'الكل' });
+            const[highlightedItemId, setHighlightedItemId] = useState(null);
             const[materials, setMaterials] = useState([]);
             const[schedules, setSchedules] = useState([]);
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -495,12 +519,26 @@
 
                 const params = new URLSearchParams(window.location.search);
                 const pageParam = params.get('page');
+                const itemParam = params.get('item');
+
                 if (pageParam) {
                     setPage(pageParam);
                     setInitialFilters({
                         year: params.get('year') || 'الكل',
                         system: params.get('system') || 'الكل'
                     });
+                    
+                    if(itemParam) {
+                        setHighlightedItemId(itemParam);
+                        // التمرير التلقائي للعنصر بعد التحميل
+                        setTimeout(() => {
+                            const el = document.getElementById(`card-${itemParam}`);
+                            if(el) {
+                                const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                                window.scrollTo({ top: y, behavior: 'smooth' });
+                            }
+                        }, 1200);
+                    }
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
 
@@ -515,7 +553,6 @@
                             document.body.style.overflow = '';
                             setTimeout(() => {
                                 splash.remove();
-                                showToast("مرحبا بكم في خدمات كلية التجارة", "success", 2500);
                             }, 150);
                         }
                     }
@@ -549,6 +586,7 @@
             const navigate = (pg) => {
                 setPage(pg);
                 setIsMobileMenuOpen(false);
+                setHighlightedItemId(null);
                 window.scrollTo(0,0);
             };
 
@@ -645,7 +683,6 @@
 
                         {page === 'home' && (
                             <div className="space-y-8">
-                                {/* تمت إزالة الإطار من الكوفر */}
                                 <div className="relative rounded-3xl overflow-hidden h-56 shadow-2xl">
                                     <img src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" className="w-full h-full object-cover" alt="الكلية" />
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-transparent flex flex-col justify-center px-8 text-white">
@@ -669,14 +706,14 @@
                             </div>
                         )}
 
-                        {page === 'lectures' && <SectionView type="lectures" title="قسم المحاضرات" icon="fa-person-chalkboard" data={getByType('lectures')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
-                        {page === 'notes' && <SectionView type="notes" title="قسم المذكرات" icon="fa-book" data={getByType('notes')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
-                        {page === 'reviews' && <SectionView type="reviews" title="قسم المراجعات والامتحانات" icon="fa-file-shield" data={getByType('reviews')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
+                        {page === 'lectures' && <SectionView type="lectures" title="قسم المحاضرات" icon="fa-person-chalkboard" data={getByType('lectures')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'notes' && <SectionView type="notes" title="قسم المذكرات" icon="fa-book" data={getByType('notes')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'reviews' && <SectionView type="reviews" title="قسم المراجعات والامتحانات" icon="fa-file-shield" data={getByType('reviews')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
 
-                        {page === 'activities' && <SectionView type="activities" title="معرض الأنشطة العام" icon="fa-users-gear" data={getByType('activities')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
-                        {page === 'training' && <SectionView type="training" title="التدريب والكورسات" icon="fa-graduation-cap" data={getByType('training')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
-                        {page === 'jobs' && <SectionView type="jobs" title="الوظائف المتاحة" icon="fa-briefcase" data={getByType('jobs')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
-                        {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} />}
+                        {page === 'activities' && <SectionView type="activities" title="معرض الأنشطة العام" icon="fa-users-gear" data={getByType('activities')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'training' && <SectionView type="training" title="التدريب والكورسات" icon="fa-graduation-cap" data={getByType('training')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'jobs' && <SectionView type="jobs" title="الوظائف المتاحة" icon="fa-briefcase" data={getByType('jobs')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
 
                         {page === 'about' && <AboutPage onBack={() => navigate('home')} />}
                         {page === 'admin' && !isAdmin && <AdminLogin onSuccess={() => { showToast("تم تسجيل الدخول بنجاح", "success"); setPage('adminDash'); }} showToast={showToast} />}
@@ -685,7 +722,8 @@
                         <AdSlot id="bottom-ad" />
                     </main>
 
-                    <div className="lg:hidden fixed bottom-0 w-full bg-white border-t-2 border-blue-900 flex justify-around py-3 text-blue-900 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.1)] rounded-t-2xl">
+                    {/* تقليل سمك إطار الهيدر السفلي */}
+                    <div className="lg:hidden fixed bottom-0 w-full bg-white border-t border-blue-900/30 flex justify-around py-3 text-blue-900 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] rounded-t-xl">
                         <button onClick={() => navigate('home')} className={`flex flex-col items-center transition-colors duration-75 ${page === 'home' ? 'text-yellow-500' : 'text-blue-900'}`}>
                             <i className="fa-solid fa-house text-lg"></i><span className="text-[10px] mt-1 font-bold">الرئيسية</span>
                         </button>
@@ -732,19 +770,19 @@
         );
 
         const HomeSlider = ({ schedules, onPreviewSlider }) => {
-            const [idx, setIdx] = useState(0);
+            const[idx, setIdx] = useState(0);
             if (!schedules.length) return null;
 
             return (
-                /* تمت إزالة الإطار من السلايدر هنا */
                 <div className="relative w-full rounded-3xl overflow-hidden shadow-xl group">
                     <div className="bg-blue-900 text-white text-center py-2 text-sm font-bold border-b border-yellow-500">
                         {schedules[idx].title || 'جداول المحاضرات الرسمية'}
                     </div>
-                    <div className="h-64 md:h-96 relative bg-gray-100 cursor-pointer p-2" onClick={() => onPreviewSlider(schedules, idx)}>
+                    {/* تقليل ارتفاع السلايدر وتغيير لون الأسهم لأسود شفاف */}
+                    <div className="h-48 md:h-72 relative bg-gray-100 cursor-pointer p-2" onClick={() => onPreviewSlider(schedules, idx)}>
                         <img src={schedules[idx].url} className="w-full h-full object-contain" />
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i-1+schedules.length)%schedules.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-blue-900/70 hover:bg-blue-900 text-white w-8 h-8 rounded-full transition-colors z-20 shadow border border-white"><i className="fa-solid fa-chevron-left"></i></button>
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i+1)%schedules.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-900/70 hover:bg-blue-900 text-white w-8 h-8 rounded-full transition-colors z-20 shadow border border-white"><i className="fa-solid fa-chevron-right"></i></button>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i-1+schedules.length)%schedules.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white w-8 h-8 rounded-full transition-colors z-20 shadow border border-white"><i className="fa-solid fa-chevron-left"></i></button>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i+1)%schedules.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white w-8 h-8 rounded-full transition-colors z-20 shadow border border-white"><i className="fa-solid fa-chevron-right"></i></button>
                     </div>
                     <div className="flex justify-center gap-1 py-2 bg-gray-50 border-t border-gray-200">
                         {schedules.map((_, i) => <div key={i} className={`h-1.5 rounded-full transition-all duration-75 ${i === idx ? 'w-6 bg-blue-900' : 'w-2 bg-gray-300'}`}></div>)}
@@ -781,6 +819,7 @@
             const[studySystem, setStudySystem] = useState('عام');
             const[link, setLink] = useState('');
             const[phone, setPhone] = useState('');
+            const[description, setDescription] = useState(''); // حقل وصف الوظيفة
             const[loading, setLoading] = useState(false);
             const[uploadProgress, setUploadProgress] = useState(0);
             const[uploadQueue, setUploadQueue] = useState([]);
@@ -848,7 +887,6 @@
                                         isCompressed = true;
                                     } catch (e) { 
                                         console.error("Compression failed", e); 
-                                        showToast("فشل ضغط الصورة، سيتم الرفع بالحجم الأصلي", "error", 2000);
                                     }
                                 }
                             }
@@ -870,6 +908,7 @@
                                     year: (sec === 'jobs' || sec === 'activities') ? 'عام' : year, 
                                     studySystem: finalStudySystem,
                                     link: sec === 'training' ? link : null, phone: sec === 'jobs' ? phone : null,
+                                    description: sec === 'jobs' ? description : null, // إضافة الوصف لقاعدة البيانات
                                     createdAt: Date.now(), department: 'عام'
                                 });
                             }
@@ -882,12 +921,13 @@
                             year: (sec === 'jobs' || sec === 'activities') ? 'عام' : year, 
                             studySystem: finalStudySystem,
                             link: sec === 'training' ? link : null, phone: sec === 'jobs' ? phone : null,
+                            description: sec === 'jobs' ? description : null, // إضافة الوصف
                             createdAt: Date.now(), department: 'عام'
                         });
                     }
 
                     showToast("تمت الإضافة بنجاح", "success");
-                    setTitle(''); setLink(''); setPhone(''); setUploadQueue([]); setUploadProgress(0);
+                    setTitle(''); setLink(''); setPhone(''); setDescription(''); setUploadQueue([]); setUploadProgress(0);
                     document.getElementById('fileInput').value = '';
                 } catch(e) { 
                     showToast("حدث خطأ أثناء الرفع", "error"); 
@@ -951,6 +991,9 @@
 
                         {sec === 'training' && <input placeholder="رابط خارجي (مثال: يوتيوب)" value={link} className="border-2 p-2 rounded focus:outline-none focus:border-blue-900 bg-gray-50" onChange={v=>setLink(v.target.value)} />}
                         {sec === 'jobs' && <input placeholder="رقم الهاتف (للتواصل واتساب/اتصال)" value={phone} className="border-2 p-2 rounded focus:outline-none focus:border-blue-900 bg-gray-50" onChange={v=>setPhone(v.target.value)} />}
+                        
+                        {/* حقل وصف الوظيفة */}
+                        {sec === 'jobs' && <textarea placeholder="اكتب تفاصيل ووصف الوظيفة هنا..." value={description} className="border-2 p-2 rounded focus:outline-none focus:border-blue-900 bg-gray-50 col-span-1 md:col-span-2 text-sm" rows="3" onChange={v=>setDescription(v.target.value)}></textarea>}
 
                         <div className="flex flex-col col-span-1 md:col-span-2 border-t-2 border-gray-100 pt-4 mt-2">
                             <label className="text-sm font-bold text-blue-900 mb-2 bg-blue-50 p-2 rounded border border-blue-100 inline-block w-fit"><i className="fa-solid fa-cloud-arrow-up ml-1"></i> اختر الملفات (يمكن تحديد أكثر من ملف):</label>
@@ -987,7 +1030,7 @@
                         <h3 className="font-bold mb-4 text-blue-900">إدارة الملفات المرفوعة:</h3>
                         <div className="space-y-2 max-h-64 overflow-y-auto sidebar-scroll pr-1">
                             {materials.map(m => (
-                                <div key={m.id} className="flex justify-between items-center p-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-sm hover:border-blue-300 transition-colors">
+                                <div key={m.id} className="flex justify-between items-center p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-blue-300 transition-colors">
                                     <span className="font-bold line-clamp-1">
                                         {m.title} 
                                         <span className="text-xs text-gray-400 font-normal mr-1">({m.sectionType})</span>
@@ -997,7 +1040,7 @@
                                 </div>
                             ))}
                             {schedules.map(s => (
-                                <div key={s.id} className="flex justify-between items-center p-3 bg-yellow-50 border-2 border-yellow-200 rounded-lg text-sm">
+                                <div key={s.id} className="flex justify-between items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
                                     <span className="font-bold line-clamp-1 text-yellow-900">{s.title} <span className="text-xs text-yellow-600 font-normal">(سلايدر)</span></span>
                                     <button onClick={()=>requestDelete('schedules', s.id)} className="text-red-500 hover:text-red-700 bg-red-50 border border-red-200 w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-75"><i className="fa-solid fa-trash"></i></button>
                                 </div>
