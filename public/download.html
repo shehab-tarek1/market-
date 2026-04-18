@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحميل تطبيق كلية التجارة | جامعة الزقازيق</title>
+
+    <!-- إعدادات معاينة الواتساب والسوشيال ميديا (Open Graph) -->
+    <meta property="og:title" content="تحميل تطبيق كلية التجارة | جامعة الزقازيق">
+    <meta property="og:description" content="البوابة التعليمية لطلاب كلية التجارة جامعة الزقازيق - حمل التطبيق الآن واستمتع بكافة المحاضرات والمذكرات.">
+    <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
+    <meta property="og:image:width" content="1364">
+    <meta property="og:image:height" content="768">
+    <meta property="og:type" content="website">
+
+    <!-- إعدادات تويتر -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="تطبيق تجارة الزقازيق">
+    <meta name="twitter:description" content="البوابة التعليمية لطلاب كلية التجارة جامعة الزقازيق.">
+    <meta name="twitter:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
+
+    <!-- إعدادات التصميم والخطوط -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="theme-color" content="#1e3a8a">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background-color: #eef2f6; 
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* أنيميشن النافذة المنبثقة */
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- رسالة إشعار النجاح (Toast) -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl text-sm font-bold z-[100] flex items-center gap-3 transition-all duration-300 opacity-0 invisible translate-y-[-20px]">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span>بدأ تحميل التطبيق بنجاح!</span>
+    </div>
+
+    <!-- بطاقة تحميل التطبيق -->
+    <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 relative">
+
+        <!-- صورة الغلاف (Cover) -->
+        <div class="h-56 relative overflow-hidden">
+            <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" 
+                 alt="غلاف الكلية" 
+                 class="w-full h-full object-cover">
+
+            <!-- تدرج لوني لجعل النص والأيقونة أكثر وضوحاً -->
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-900/40 to-transparent"></div>
+        </div>
+
+        <!-- معلومات التطبيق -->
+        <div class="px-6 pb-8 pt-4 relative -mt-16 text-center">
+            <!-- أيقونة التطبيق (قبعة التخرج بدلاً من الروبوت) -->
+            <div class="w-24 h-24 bg-gradient-to-tr from-blue-600 to-blue-900 rounded-2xl shadow-xl mx-auto flex items-center justify-center text-white text-4xl border-4 border-white z-10 relative mb-4">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+
+            <h1 class="text-2xl font-black text-gray-800 mb-1">تجارة الزقازيق</h1>
+            <!-- تم إزالة كلمة الرسمية هنا -->
+            <p class="text-sm text-gray-500 font-bold mb-6">البوابة التعليمية (V 1.0.0)</p>
+
+            <!-- إحصائيات وهمية لزيادة الموثوقية -->
+            <div class="flex justify-center gap-3 mb-8 text-xs font-bold text-gray-600 bg-blue-50/50 py-3 rounded-2xl border border-blue-100/50">
+                <div class="flex-1 text-center border-l border-gray-200">
+                    <i class="fa-solid fa-star text-yellow-400 mb-1.5 block text-base drop-shadow-sm"></i>
+                    <span>4.9</span>
+                </div>
+                <div class="flex-1 text-center border-l border-gray-200">
+                    <i class="fa-solid fa-shield-halved text-green-500 mb-1.5 block text-base drop-shadow-sm"></i>
+                    <span>آمن</span>
+                </div>
+                <div class="flex-1 text-center">
+                    <i class="fa-solid fa-mobile-screen text-blue-500 mb-1.5 block text-base drop-shadow-sm"></i>
+                    <span>Android</span>
+                </div>
+            </div>
+
+            <!-- زر التثبيت -->
+            <button onclick="showInstallModal()" class="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-lg font-black py-4 rounded-2xl shadow-[0_8px_20px_rgba(37,99,235,0.3)] transition-all flex justify-center items-center gap-2 transform hover:-translate-y-1">
+                <i class="fa-solid fa-download"></i>
+                تثبيت التطبيق الآن
+            </button>
+
+            <p class="mt-4 text-[11px] text-gray-400 font-bold">
+                <i class="fa-solid fa-lock mr-1"></i> تحميل مباشر وسريع بصيغة APK
+            </p>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد التحميل (Modal) -->
+    <!-- تم تفعيل Flexbox بشكل سليم لضمان التوسيط الدقيق في منتصف الشاشة -->
+    <div id="installModal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 bg-blue-950/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl animate-pop text-center relative border border-gray-100">
+
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-3xl border-4 border-white shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-down animate-bounce"></i>
+            </div>
+
+            <h3 class="text-xl font-black text-gray-800 mb-2">تأكيد التثبيت</h3>
+            <p class="text-xs text-gray-500 font-bold mb-6 leading-relaxed px-2">
+                أنت على وشك تحميل تطبيق "تجارة الزقازيق" بصيغة APK على هاتفك، هل ترغب في بدء التحميل الآن؟
+            </p>
+
+            <div class="flex gap-3">
+                <button onclick="startDownload()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-black hover:bg-blue-700 shadow-md transition-colors">
+                    موافق، تحميل
+                </button>
+                <button onclick="hideInstallModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-black hover:bg-gray-200 border border-gray-200 transition-colors">
+                    إلغاء
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- جافاسكربت للتحكم في الأزرار والتحميل -->
+    <script>
+        const modal = document.getElementById('installModal');
+        const toast = document.getElementById('toast');
+        const apkUrl = "https://faculty-of-commerce-zag.vercel.app/Commerce Zagazig.apk";
+
+        function showInstallModal() {
+            // استخدام Flex لضمان التوسيط المثالي في منتصف الشاشة
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // تأخير بسيط ليعمل الأنيميشن بشكل سليم
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function hideInstallModal() {
+            modal.classList.add('opacity-0');
+
+            // إعادة الإخفاء بعد انتهاء حركة الاختفاء
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300); 
+        }
+
+        function startDownload() {
+            hideInstallModal();
+
+            // إظهار إشعار النجاح (Toast)
+            toast.classList.remove('opacity-0', 'invisible', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'visible', 'translate-y-0');
+
+            // إخفاء الإشعار بعد 3 ثواني
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'invisible', 'translate-y-[-20px]');
+                toast.classList.remove('opacity-100', 'visible', 'translate-y-0');
+            }, 3500);
+
+            // أمر بدء التحميل الفوري
+            const downloadLink = document.createElement('a');
+            downloadLink.href = apkUrl;
+            downloadLink.download = "Commerce_Zagazig.apk";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+
+</body>
+</html>
