@@ -9,6 +9,14 @@
     <!-- تسريع الاتصال بسيرفرات الصور وقواعد البيانات -->
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+    <!-- التحميل المسبق للأيقونات والخطوط لضمان ظهورها فوراً -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" as="style">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
 
     <!-- إعدادات PWA -->
     <link rel="manifest" href="manifest.json">
@@ -18,9 +26,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <!-- تم حذف مكتبة ضغط الصور من هنا لتسريع الموقع للطلاب، وسيتم تحميلها للأدمن فقط -->
 
     <!-- استخدام نسخة الإنتاج السريعة من React -->
     <script type="importmap">
@@ -39,12 +44,12 @@
     <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
     <meta property="og:url" content="https://faculty-of-commerce-2026.firebaseapp.com/">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="تجارة الزقازيق">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
-
         body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
+
+        /* تسريع استجابة اللمس على الموبايل وإلغاء التأخير الزمني */
+        button, a, select, input { touch-action: manipulation; }
 
         .ad-container:empty { display: none !important; }
         .nav-link-active { border-bottom: 3px solid #fbbf24; color: #fbbf24 !important; }
@@ -54,10 +59,18 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* إيقاف جميع الرسوم المتحركة ليكون الموقع لحظي */
+        /* إيقاف جميع الرسوم المتحركة ليكون الموقع لحظي (ماعدا تأثير الهيكل النبضي) */
         * {
             transition: none !important;
-            animation: none !important;
+        }
+
+        /* حركة خفيفة لهيكل التحميل */
+        @keyframes custom-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .7; }
+        }
+        .animate-pulse-fast {
+            animation: custom-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
         }
 
         .optimized-card {
@@ -65,55 +78,20 @@
             contain-intrinsic-size: 150px;
         }
 
-        #native-splash {
-            position: fixed; inset: 0; z-index: 999999;
-            background: linear-gradient(135deg, #1e3a8a 0%, #475569 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        #native-splash::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
         .bg-soft-white { background-color: #fafbfc; }
     </style>
 </head>
 <body class="pb-20 lg:pb-0 text-gray-800">
 
-    <div id="native-splash">
-        <div style="position:relative; z-index:10; display:flex; flex-direction:column; align-items:center;">
-            <div style="width:64px; height:64px; background:white; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#1e3a8a; box-shadow:0 25px 50px -12px rgba(0,0,0,0.25); margin-bottom:16px;">
-                <i class="fa-solid fa-graduation-cap" style="font-size: 30px;"></i>
-            </div>
-            <h1 style="font-size: 12px; font-weight: 900; color: white; margin-bottom: 4px; letter-spacing: 1px;">أهلاً بكم</h1>
-            <p style="font-size: 10px; font-weight: 700; color: #d1d5db; display:flex; align-items:center; gap:6px; opacity: 0.9;">
-                <i class="fa-solid fa-spinner fa-spin" style="animation: fa-spin 2s infinite linear !important;"></i>
-                جاري التجهيز...
-            </p>
-        </div>
-    </div>
-
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+        import React, { useState, useEffect, useRef, useMemo, useCallback, startTransition } from 'react';
         import { createRoot } from 'react-dom/client';
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         
-        // استدعاء أدوات التخزين المؤقت وحماية الذاكرة من فايربيز
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
-
-        window.hideNativeSplash = () => {
-            const splash = document.getElementById('native-splash');
-            if (splash) {
-                splash.style.display = 'none';
-                document.body.style.overflow = '';
-                splash.remove();
-            }
-            window.hideNativeSplash = () => {}; 
-        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyANg4wLchZaikXneXr1c3qhRgcOnvPbfoA",
@@ -121,14 +99,12 @@
             projectId: "faculty-of-commerce-2026",
             storageBucket: "faculty-of-commerce-2026.firebasestorage.app",
             messagingSenderId: "350727231766",
-            appId: "1:350727231766:web:b08a0f335e38bfc2e79837",
-            measurementId: "G-PR20GFXT58"
+            appId: "1:350727231766:web:b08a0f335e38bfc2e79837"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         
-        // تفعيل التخزين المؤقت (Offline Cache) لكي يفتح الموقع بدون إنترنت وبسرعة الصاروخ
         const db = initializeFirestore(app, {
             localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
         });
@@ -276,7 +252,7 @@
 
             const visibleData = filtered.slice(0, visibleCount);
 
-            const isA4Card = type === 'lectures' || type === 'notes' || type === 'reviews';
+            const isA4Card = type === 'lectures' || type === 'notes' || type === 'reviews' || type === 'guide';
             const isActivities = type === 'activities';
             const thumbType = isA4Card ? 'a4' : 'default';
 
@@ -293,34 +269,11 @@
                 return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
             };
 
-            const handleShareSection = async () => {
+            const handleShareCard = async (e, item) => {
+                e.stopPropagation();
                 const url = new URL(window.location.origin + window.location.pathname);
-                url.searchParams.set('page', type);
-
-                const yMap = {'الفرقة الأولى':'1', 'الفرقة الثانية':'2', 'الفرقة الثالثة':'3', 'الفرقة الرابعة':'4', 'كل الفرق':'all'};
-                const sMap = {'انتظام':'r', 'انتساب':'a'};
-
-                if (!hideYearFilter && filterYear !== 'اختار الفرقة') {
-                    url.searchParams.set('y', yMap[filterYear] || filterYear);
-                }
-                if (showSystemFilter && filterSystem !== 'اختار النظام') {
-                    url.searchParams.set('s', sMap[filterSystem] || filterSystem);
-                }
-
-                try {
-                    if (navigator.share) {
-                        await navigator.share({ title: `قسم ${title} - كلية التجارة`, url: url.toString() });
-                    } else {
-                        await navigator.clipboard.writeText(url.toString());
-                        showToast("تم نسخ رابط القسم", "success");
-                    }
-                } catch (e) {}
-            };
-
-            const handleShareCard = async (item) => {
-                const url = new URL(window.location.origin + window.location.pathname);
-                url.searchParams.set('page', type);
-                url.searchParams.set('item', item.id);
+                url.searchParams.set('p', type);
+                url.searchParams.set('i', item.id);
                 try {
                     if (navigator.share) {
                         await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
@@ -392,7 +345,7 @@
 
                                 if (isActivities) {
                                     return (
-                                        <div key={item.id} id={`card-${item.id}`} className={`optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black`} onClick={() => onPreviewSingle(item.fileUrl)}>
+                                        <div key={item.id} id={`card-${item.id}`} className={`optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group`} onClick={() => onPreviewSingle(item.fileUrl)}>
                                             {isVid && (
                                                 <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                                                     <div className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center text-white border-2 border-white/50">
@@ -400,6 +353,10 @@
                                                     </div>
                                                 </div>
                                             )}
+
+                                            <button onClick={(e) => handleShareCard(e, item)} className="absolute top-2 left-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center z-30 opacity-0 group-hover:opacity-100 border border-white/20">
+                                                <i className="fa-solid fa-share-nodes text-xs"></i>
+                                            </button>
 
                                             <img 
                                                 src={loadImages ? getThumbnail(item.fileUrl, 'default') : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='} 
@@ -476,6 +433,9 @@
                                                         <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center">
                                                             <i className="fa-solid fa-download"></i> تحميل
                                                         </button>
+                                                        <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100">
+                                                            <i className="fa-solid fa-share-nodes"></i>
+                                                        </button>
                                                     </>
                                                 )}
 
@@ -493,6 +453,9 @@
                                                         <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center">
                                                             <i className="fa-solid fa-phone"></i>
                                                         </a>
+                                                        <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100">
+                                                            <i className="fa-solid fa-share-nodes"></i>
+                                                        </button>
                                                     </>
                                                 )}
                                             </div>
@@ -514,6 +477,58 @@
             );
         });
 
+        // مكون السلايدر المحدث مع عرض "الهيكل" أثناء التحميل
+        const HomeSlider = React.memo(({ schedules, onPreviewSlider }) => {
+            const[idx, setIdx] = useState(0);
+
+            // عرض الهيكل (Skeleton) إذا كانت البيانات قيد التحميل
+            if (!schedules || schedules.length === 0) {
+                return (
+                    <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-200 animate-pulse-fast">
+                        <div className="bg-blue-900/50 text-transparent text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500/50">
+                            جاري التحميل...
+                        </div>
+                        <div className="h-40 md:h-72 bg-gray-200 w-full flex items-center justify-center">
+                            <i className="fa-regular fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                        <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">
+                            <div className="h-1 rounded-full w-5 bg-gray-300"></div>
+                            <div className="h-1 rounded-full w-1.5 bg-gray-300"></div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-200 group bg-gray-100">
+                    <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500">
+                        {schedules[idx].title || 'جداول المحاضرات الرسمية'}
+                    </div>
+                    <div className="h-40 md:h-72 relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => onPreviewSlider(schedules, idx)}>
+                        <img 
+                            src={getThumbnail(schedules[idx].url, 'slider')} 
+                            className="w-full h-full object-contain scale-[1.02]" 
+                            decoding="sync"
+                            fetchpriority={idx === 0 ? "high" : "auto"}
+                            loading={idx === 0 ? "eager" : "lazy"}
+                            alt={schedules[idx].title || "جدول"}
+                        />
+                        {schedules.length > 1 && (
+                            <>
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i-1+schedules.length)%schedules.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center"><i className="fa-solid fa-chevron-left text-xs"></i></button>
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i+1)%schedules.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center"><i className="fa-solid fa-chevron-right text-xs"></i></button>
+                            </>
+                        )}
+                    </div>
+                    {schedules.length > 1 && (
+                        <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">
+                            {schedules.map((_, i) => <div key={i} className={`h-1 rounded-full ${i === idx ? 'w-5 bg-blue-900' : 'w-1.5 bg-gray-300'}`}></div>)}
+                        </div>
+                    )}
+                </div>
+            );
+        });
+
         const App = () => {
             const[user, setUser] = useState(null);
             const[isAdmin, setIsAdmin] = useState(false);
@@ -522,8 +537,6 @@
             const[highlightedItemId, setHighlightedItemId] = useState(null);
             const[materials, setMaterials] = useState([]);
             const[schedules, setSchedules] = useState([]);
-            
-            const[isSchedulesLoaded, setIsSchedulesLoaded] = useState(false);
 
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const[previewData, setPreviewData] = useState({ items:[], index: -1 });
@@ -608,11 +621,14 @@
             };
 
             useEffect(() => {
-                document.body.style.overflow = 'hidden';
+                // إظهار الترحيب بعد 1.5 ثانية من تحميل الموقع لكي لا يغطي على الواجهة فوراً
+                const welcomeTimer = setTimeout(() => {
+                    showToast("مرحباً بكم في موقعي", "success", 3000);
+                }, 1500);
 
                 const params = new URLSearchParams(window.location.search);
-                const pageParam = params.get('page');
-                const itemParam = params.get('item');
+                const pageParam = params.get('page') || params.get('p');
+                const itemParam = params.get('item') || params.get('i');
 
                 const resolveYear = (val) => {
                     if(!val) return 'اختار الفرقة';
@@ -652,44 +668,41 @@
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
 
-                const fallbackTimer = setTimeout(() => {
-                    if (window.hideNativeSplash) window.hideNativeSplash();
-                }, 2500);
-
                 onAuthStateChanged(auth, (u) => {
                     setUser(u);
                     setIsAdmin(u && u.uid === ADMIN_UID);
                 });
 
-                // تطبيق حماية الذاكرة (جلب أحدث 500 ملف فقط بدلاً من كل قاعدة البيانات)
-                const qMat = query(collection(db, 'materials'), orderBy('createdAt', 'desc'), limit(100));
-                const unsubMat = onSnapshot(qMat, (snap) => {
+                const qMat = query(collection(db, 'materials'), orderBy('createdAt', 'desc'), limit(150));
+                const unsubMat = onSnapshot(qMat, { includeMetadataChanges: true }, (snap) => {
                     setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                }, (error) => {
-                    if (window.hideNativeSplash) window.hideNativeSplash(); 
                 });
 
-                const unsubSch = onSnapshot(collection(db, 'schedules'), (snap) => {
+                const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => {
                     setSchedules(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                    setIsSchedulesLoaded(true);
-                    if (window.hideNativeSplash) window.hideNativeSplash();
-                }, (error) => {
-                    if (window.hideNativeSplash) window.hideNativeSplash(); 
                 });
 
-                return () => { unsubMat(); unsubSch(); clearTimeout(fallbackTimer); };
+                return () => { 
+                    unsubMat(); 
+                    unsubSch(); 
+                    clearTimeout(welcomeTimer); 
+                };
             },[]);
 
             const getByType = useCallback((type) => {
                 return materials.filter(m => m.sectionType === type);
-            }, [materials]);
+            },[materials]);
 
+            // تسريع التنقل بين الصفحات باستخدام React Transitions
             const navigate = useCallback((pg) => {
-                if (window.hideNativeSplash) window.hideNativeSplash();
                 setIsMobileMenuOpen(false);
                 setHighlightedItemId(null);
-                window.scrollTo(0,0);
-                setPage(pg);
+                // التمرير للأعلى لحظياً بدون تأخير
+                window.scrollTo({ top: 0, behavior: 'instant' });
+                // استخدام startTransition لمنع تجميد الواجهة أثناء تحديث القسم
+                startTransition(() => {
+                    setPage(pg);
+                });
             },[]);
 
             return (
@@ -826,19 +839,18 @@
                         {page === 'home' && (
                             <div className="space-y-6 md:space-y-8">
                                 <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-56 shadow-lg">
-                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="async" />
+                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-950/85 via-blue-900/45 to-transparent flex flex-col justify-center items-center text-center px-6 md:px-8 text-white">
                                         <h2 className="text-2xl md:text-3xl font-black mb-1 md:mb-2 drop-shadow-lg">بوابة كلية التجارة</h2>
                                         <p className="opacity-90 font-bold text-xs md:text-sm drop-shadow-md">جامعة الزقازيق - شهاب طارق صلاح</p>
                                     </div>
                                 </div>
 
-                                {isSchedulesLoaded && (
-                                    <HomeSlider 
-                                        schedules={schedules} 
-                                        onPreviewSlider={openSliderPreview} 
-                                    />
-                                )}
+                                {/* إظهار السلايدر دائماً (سواء محمل أو كـ Skeleton) */}
+                                <HomeSlider 
+                                    schedules={schedules} 
+                                    onPreviewSlider={openSliderPreview} 
+                                />
 
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                                     <div 
@@ -871,11 +883,10 @@
                         {page === 'lectures' && <SectionView type="lectures" title="قسم المحاضرات" icon="fa-person-chalkboard" data={getByType('lectures')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'notes' && <SectionView type="notes" title="قسم المذكرات" icon="fa-book" data={getByType('notes')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'reviews' && <SectionView type="reviews" title="قسم المراجعات والامتحانات" icon="fa-file-shield" data={getByType('reviews')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
-
                         {page === 'activities' && <SectionView type="activities" title="معرض الأنشطة العام" icon="fa-users-gear" data={getByType('activities')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'training' && <SectionView type="training" title="التدريب والكورسات" icon="fa-graduation-cap" data={getByType('training')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'jobs' && <SectionView type="jobs" title="الوظائف المتاحة" icon="fa-briefcase" data={getByType('jobs')} hideYearFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
-                        {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
+                        {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} showSystemFilter={true} onBack={() => navigate('home')} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
 
                         {page === 'about' && <AboutPage onBack={() => navigate('home')} />}
                         {page === 'admin' && !isAdmin && <AdminLogin onSuccess={() => { showToast("تم تسجيل الدخول بنجاح", "success"); navigate('adminDash'); }} showToast={showToast} />}
@@ -930,34 +941,6 @@
             </div>
         ));
 
-        const HomeSlider = React.memo(({ schedules, onPreviewSlider }) => {
-            const[idx, setIdx] = useState(0);
-
-            if (!schedules || !schedules.length) return null;
-
-            return (
-                <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-200 group">
-                    <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500">
-                        {schedules[idx].title || 'جداول المحاضرات الرسمية'}
-                    </div>
-                    <div className="h-40 md:h-72 relative bg-soft-white cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => onPreviewSlider(schedules, idx)}>
-                        <img 
-                            src={getThumbnail(schedules[idx].url, 'slider')} 
-                            className="w-full h-full object-contain scale-[1.02]" 
-                            decoding="async"
-                            fetchpriority={idx === 0 ? "high" : "auto"}
-                            loading={idx === 0 ? "eager" : "lazy"}
-                        />
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i-1+schedules.length)%schedules.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center"><i className="fa-solid fa-chevron-left text-xs"></i></button>
-                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i+1)%schedules.length); }} className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center"><i className="fa-solid fa-chevron-right text-xs"></i></button>
-                    </div>
-                    <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">
-                        {schedules.map((_, i) => <div key={i} className={`h-1 rounded-full ${i === idx ? 'w-5 bg-blue-900' : 'w-1.5 bg-gray-300'}`}></div>)}
-                    </div>
-                </div>
-            );
-        });
-
         const AdminLogin = ({ onSuccess, showToast }) => {
             const[e, setE] = useState('');
             const[p, setP] = useState('');
@@ -1004,6 +987,8 @@
             const uploadFileWithProgress = (file, isCompressed) => {
                 return new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
+                    xhr.timeout = 0; 
+                    
                     xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`);
 
                     xhr.upload.onprogress = (e) => {
@@ -1030,10 +1015,9 @@
                 setLoading(true);
                 setUploadProgress(0);
                 try {
-                    // تحميل مكتبة ضغط الصور فقط عند الحاجة لرفع ملفات
                     const { default: imageCompression } = await import('https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/+esm');
 
-                    const finalStudySystem = (sec === 'lectures' || sec === 'notes' || sec === 'reviews') ? studySystem : 'عام';
+                    const finalStudySystem = (sec === 'lectures' || sec === 'notes' || sec === 'reviews' || sec === 'guide') ? studySystem : 'عام';
 
                     if (uploadQueue.length > 0) {
                         const hasEmptyTitles = uploadQueue.some(item => !item.title || !item.title.trim());
@@ -1071,7 +1055,7 @@
                                 }
                             }
 
-                            showToast(`جاري الرفع للسيرفر (${i+1}/${uploadQueue.length})...`, "info", 0);
+                            showToast(`جاري الرفع للسيرفر (${i+1}/${uploadQueue.length})... قد يستغرق وقتاً للملفات الكبيرة`, "info", 0);
                             const d = await uploadFileWithProgress(fileToUpload, isCompressed);
 
                             if (!isPdf && !isVideo && d.secure_url.includes('/image/upload/')) {
@@ -1165,7 +1149,7 @@
                             </select>
                         )}
 
-                        {(sec === 'lectures' || sec === 'notes' || sec === 'reviews') && (
+                        {(sec === 'lectures' || sec === 'notes' || sec === 'reviews' || sec === 'guide') && (
                             <select className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white font-bold text-gray-700 col-span-1 md:col-span-2" value={studySystem} onChange={v=>setStudySystem(v.target.value)}>
                                 <option value="عام">عام (يظهر لطلاب الانتظام والانتساب)</option>
                                 <option value="انتظام">انتظام فقط</option>
@@ -1179,7 +1163,7 @@
                         {sec === 'jobs' && <textarea placeholder="اكتب تفاصيل ووصف الوظيفة هنا..." value={description} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white col-span-1 md:col-span-2" rows="3" onChange={v=>setDescription(v.target.value)}></textarea>}
 
                         <div className="flex flex-col col-span-1 md:col-span-2 border-t border-gray-100 pt-3 mt-1">
-                            <label className="text-xs font-bold text-blue-900 mb-2 bg-blue-50 p-1.5 rounded border border-blue-100 inline-block w-fit"><i className="fa-solid fa-cloud-arrow-up ml-1"></i> اختر الملفات (صور، PDF، فيديو):</label>
+                            <label className="text-xs font-bold text-blue-900 mb-2 bg-blue-50 p-1.5 rounded border border-blue-100 inline-block w-fit"><i className="fa-solid fa-cloud-arrow-up ml-1"></i> اختر الملفات (صور، PDF، فيديو حتى 100MB):</label>
                             <input id="fileInput" type="file" multiple className="border border-gray-200 p-1.5 rounded-lg bg-white cursor-pointer text-xs" onChange={handleFileChange} />
                         </div>
 
