@@ -2,25 +2,21 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google-adsense-account" content="ca-pub-4229854234305317">
     <title>كلية التجارة جامعة الزقازيق | مساهمة طلابيه </title>
 
-   <!-- تجهيز الاتصال للسيرفرات (Cloudinary للأهمية القصوى و Firebase للخلفية) -->
     <link rel="preconnect" href="https://res.cloudinary.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
 
-<!-- تحميل أول صورة في السلايدر بأولوية قصوى قبل معالجة الكود -->
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
-
- <!-- تحميل الأيقونات والخطوط بنظام لا يعطل واجهة الموقع -->
+    <!-- 🌟 تم تصغير صورة الواجهة إلى 600 بكسل لتناسب الهواتف وتلغي اللاج تماماً -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:low,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'">
 
-    <!-- إعدادات PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="icon-192x192.png">
@@ -29,7 +25,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- استخدام نسخة الإنتاج السريعة من React -->
     <script type="importmap">
         {
             "imports": {
@@ -40,33 +35,45 @@
     </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- بيانات المعاينة -->
     <meta property="og:title" content="كلية التجارة جامعة الزقازيق | الموقع التعليمي">
     <meta property="og:description" content="المنصة التعليمية الشاملة لطلاب كلية التجارة جامعة الزقازيق - محاضرات، مذكرات، جداول، وأنشطة طلابية.">
-    <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
+    <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
     <meta property="og:url" content="https://faculty-of-commerce-2026.firebaseapp.com/">
     <meta property="og:type" content="website">
 
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
-
-        /* تسريع استجابة اللمس على الموبايل وإلغاء التأخير الزمني */
+        body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         button, a, select, input, .optimized-card { touch-action: manipulation; }
-
         .ad-container:empty { display: none !important; }
         .nav-link-active { border-bottom: 3px solid #fbbf24; color: #fbbf24 !important; }
-
         .sidebar-scroll::-webkit-scrollbar { height: 4px; width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        * { transition: none !important; }
+        .bg-soft-white { background-color: #fafbfc; }
 
-        /* إيقاف جميع الرسوم المتحركة ليكون الموقع لحظي */
-        * {
-            transition: none !important;
+        /* حركة القائمة المنسدلة الصغيرة */
+        @keyframes dropDown {
+            from { opacity: 0; transform: translateY(-5px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-drop-down {
+            transform-origin: top;
+            animation: dropDown 0.15s ease-out forwards;
         }
 
-        .bg-soft-white { background-color: #fafbfc; }
+        /* 🌟 حركة نبض الإطار لتمييز البطاقة المطلوبة (لمدة 3 ثواني) */
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); border-color: #3b82f6; }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); border-color: #3b82f6; }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); border-color: transparent; }
+        }
+        .highlight-target {
+            animation: highlightPulse 1s ease-out 3;
+            border: 2px solid #3b82f6 !important;
+            border-radius: 0.75rem;
+        }
     </style>
 </head>
 <body class="pb-20 lg:pb-0 text-gray-800">
@@ -76,19 +83,14 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
+        // استيراد أدوات القراءة فقط من فايربيز
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
-        
-        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
-        // دالة تحويل الرموز الإنجليزية إلى أرقام للروابط
         const toNumericId = (str) => {
             if (!str) return '';
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0; 
-            }
+            for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
             return Math.abs(hash).toString();
         };
 
@@ -102,34 +104,24 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        
-        const db = initializeFirestore(app, {
-            localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
-        });
-
-        const CLOUD_NAME = 'dsxrjmcxs';
-        const UPLOAD_PRESET = 'my_public_preset';
-        const ADMIN_UID = 'mEVbroYWf7cg68SL8CB2uUS8XhZ2';
+        const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
 
         const isVideoUrl = (url) => {
             if (!url) return false;
             return url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes('/video/upload/');
         };
 
+        // 🌟 تصغير أحجام الصور لتسريع الموقع للهواتف الضعيفة بشكل صاروخي
         const getThumbnail = (url, type = 'default') => {
             if (!url) return '';
             if (url.includes('cloudinary.com')) {
-                let transform = '/upload/w_300,h_300,c_fill,q_auto:eco,f_auto/';
-                if (type === 'a4') transform = '/upload/w_200,h_280,c_fill,q_auto:eco,f_auto/';
-                if (type === 'slider') transform = '/upload/w_800,h_400,c_fit,q_auto:eco,f_auto/';
-                
-                if (url.toLowerCase().endsWith('.pdf')) {
-                    return url.replace('/upload/', transform).replace(/\.pdf$/i, '.jpg');
-                }
-                if (isVideoUrl(url)) {
-                    return url.replace('/upload/', transform).replace(/\.(mp4|webm|ogg|mov)$/i, '.jpg');
-                }
+                let transform = '/upload/w_100,h_100,c_fill,q_auto:low,f_auto/'; // للأنشطة
+                if (type === 'a4') transform = '/upload/w_80,h_112,c_fill,q_auto:low,f_auto/'; // للمذكرات والمحاضرات
+                if (type === 'slider') transform = '/upload/w_250,h_150,c_fit,q_auto:low,f_auto/'; // 🌟 تصغير السلايدر الخارجي جداً
+                if (type === 'preview') transform = '/upload/w_500,c_limit,q_auto:eco,f_auto/'; // 🌟 تصغير الصورة عند فتحها للقراءة (بدل الأصلية المليئة باللاج)
+
+                if (url.toLowerCase().endsWith('.pdf')) return url.replace('/upload/', transform).replace(/\.pdf$/i, '.jpg');
+                if (isVideoUrl(url)) return url.replace('/upload/', transform).replace(/\.(mp4|webm|ogg|mov)$/i, '.jpg');
                 return url.replace('/upload/', transform);
             }
             return url;
@@ -148,59 +140,83 @@
             );
         });
 
+        // 🌟 القائمة المنسدلة الصغيرة والأنيقة لحل مشكلة القص
+        const CustomMobileFilter = React.memo(({ value, options, onChange, align = "right" }) => {
+            const[isOpen, setIsOpen] = useState(false);
+            const alignClass = align === "left" ? "left-0" : "right-0"; 
+
+            return (
+                <div className="relative">
+                    <button 
+                        onClick={() => setIsOpen(!isOpen)} 
+                        className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800 flex items-center justify-between min-w-[70px]"
+                    >
+                        <span>{value}</span>
+                        <i className={`fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
+                    </button>
+
+                    {isOpen && (
+                        <>
+                            <div className="fixed inset-0 z-[99998]" onClick={() => setIsOpen(false)}></div>
+                            <div className={`absolute ${alignClass} top-full mt-1.5 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-[99999] animate-drop-down overflow-hidden`}>
+                                <div className="flex flex-col py-1 max-h-56 overflow-y-auto sidebar-scroll">
+                                    {options.map(opt => (
+                                        <button 
+                                            key={opt} 
+                                            onClick={() => { onChange(opt); setIsOpen(false); }}
+                                            className={`flex items-center justify-between w-full px-3 py-2.5 text-[10px] font-bold transition-colors ${value === opt ? 'bg-blue-50 text-blue-900' : 'text-gray-600 hover:bg-gray-50'}`}
+                                        >
+                                            <span className="truncate">{opt}</span>
+                                            {value === opt && <i className="fa-solid fa-check text-[9px]"></i>}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        });
+
+        // 🌟 نافذة المعاينة (تم تحديثها لتستخدم صور مضغوطة بدلاً من الأصلية)
         const PreviewModal = React.memo(({ previewData, onClose, onNavigate }) => {
             const[isMediaLoading, setIsMediaLoading] = useState(true);
 
             useEffect(() => {
-                if (previewData.items.length > 0) {
-                    document.body.style.overflow = 'hidden';
-                    setIsMediaLoading(true); 
-                } else {
-                    document.body.style.overflow = 'auto';
-                }
+                if (previewData.items.length > 0) { document.body.style.overflow = 'hidden'; setIsMediaLoading(true); } 
+                else { document.body.style.overflow = 'auto'; }
                 return () => { document.body.style.overflow = 'auto'; };
             },[previewData]);
 
             if (previewData.items.length === 0) return null;
-
             const currentItem = previewData.items[previewData.index];
             if (!currentItem || !currentItem.url) return null;
-            
+
             const isPdf = currentItem.url.toLowerCase().includes('.pdf');
             const isVid = isVideoUrl(currentItem.url);
             const pdfViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(currentItem.url)}&embedded=true`;
 
+            // 🌟 ضغط الصورة المعروضة في النافذة لتسريع الفتح
+            const displayUrl = (!isPdf && !isVid) ? getThumbnail(currentItem.url, 'preview') : currentItem.url;
+
             return (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-2 md:p-10">
-                    <button onClick={onClose} className="absolute top-4 right-4 md:top-6 md:right-6 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-700 z-50 shadow-lg border-2 border-white">
-                        <i className="fa-solid fa-xmark text-xl"></i>
-                    </button>
-
+                    <button onClick={onClose} className="absolute top-4 right-4 md:top-6 md:right-6 bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-700 z-50 shadow-lg border-2 border-white"><i className="fa-solid fa-xmark text-xl"></i></button>
                     <div className="w-full h-full max-w-6xl bg-black rounded-xl overflow-hidden relative flex items-center justify-center shadow-2xl">
-                        
                         {isMediaLoading && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-black/50">
                                 <i className="fa-solid fa-circle-notch fa-spin text-white text-4xl mb-2" style={{animation: 'fa-spin 2s infinite linear !important'}}></i>
                                 <span className="text-white text-xs font-bold mt-2">جاري التحميل...</span>
                             </div>
                         )}
-
-                        {isPdf ? (
-                            <iframe onLoad={() => setIsMediaLoading(false)} src={pdfViewerUrl} className="w-full h-full border-0 bg-white relative z-30" title="PDF Preview"></iframe>
-                        ) : isVid ? (
-                            <video onLoadedData={() => setIsMediaLoading(false)} src={currentItem.url} controls autoPlay className="max-w-full max-h-full outline-none relative z-30" playsInline></video>
-                        ) : (
-                            <img onLoad={() => setIsMediaLoading(false)} src={currentItem.url} alt="Preview" className="max-w-full max-h-full object-contain relative z-30" decoding="async" />
-                        )}
+                        {isPdf ? <iframe onLoad={() => setIsMediaLoading(false)} src={pdfViewerUrl} className="w-full h-full border-0 bg-white relative z-30" title="PDF Preview"></iframe>
+                        : isVid ? <video onLoadedData={() => setIsMediaLoading(false)} src={currentItem.url} controls autoPlay className="max-w-full max-h-full outline-none relative z-30" playsInline></video>
+                        : <img onLoad={() => setIsMediaLoading(false)} src={displayUrl} alt="Preview" className="max-w-full max-h-full object-contain relative z-30" decoding="async" />}
 
                         {previewData.items.length > 1 && (
                             <>
-                                <button onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50">
-                                    <i className="fa-solid fa-chevron-left text-lg md:text-xl"></i>
-                                </button>
-                                <button onClick={(e) => { e.stopPropagation(); onNavigate('next'); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50">
-                                    <i className="fa-solid fa-chevron-right text-lg md:text-xl"></i>
-                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50"><i className="fa-solid fa-chevron-left text-lg md:text-xl"></i></button>
+                                <button onClick={(e) => { e.stopPropagation(); onNavigate('next'); }} className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50"><i className="fa-solid fa-chevron-right text-lg md:text-xl"></i></button>
                             </>
                         )}
                     </div>
@@ -216,15 +232,11 @@
         });
 
         const SectionView = React.memo(({ type, title, icon, data, hideYearFilter = false, showSystemFilter = false, onBack, onPreviewSingle, onRequestDownload, initialFilters, showToast, highlightedItemId }) => {
-
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'اختار الفرقة');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'اختار النظام'); 
             const[visibleCount, setVisibleCount] = useState(6);
 
-            const years = type === 'training' 
-                ?['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة', 'كل الفرق'] 
-                :['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة'];
-                
+            const years = type === 'training' ?['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة', 'كل الفرق'] :['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة'];
             const systems =['اختار النظام', 'انتظام', 'انتساب'];
 
             const filtered = useMemo(() => {
@@ -239,14 +251,11 @@
             useEffect(() => {
                 if(highlightedItemId) {
                     const itemIndex = filtered.findIndex(i => toNumericId(i.id) === highlightedItemId);
-                    if(itemIndex >= visibleCount) {
-                        setVisibleCount(itemIndex + 12);
-                    }
+                    if(itemIndex >= visibleCount) setVisibleCount(itemIndex + 12);
                 }
             },[highlightedItemId, filtered]);
 
             const visibleData = filtered.slice(0, visibleCount);
-
             const isA4Card = type === 'lectures' || type === 'notes' || type === 'reviews' || type === 'guide';
             const isActivities = type === 'activities';
             const thumbType = isA4Card ? 'a4' : 'default';
@@ -264,253 +273,133 @@
                 return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
             };
 
+            // 🌟 روابط مشاركة قصيرة ونظيفة بدون index.html
             const handleShareCard = async (e, item) => {
                 e.stopPropagation();
                 try {
-                    const url = new URL(window.location.href);
+                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
+                    const url = new URL(basePath);
                     url.searchParams.set('p', type);
-                    url.searchParams.set('i', toNumericId(item.id)); // استخدام الرقم بدلاً من الرمز الإنجليزي
-                    if (navigator.share) {
-                        await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
-                    } else {
-                        await navigator.clipboard.writeText(url.toString());
-                        showToast("تم نسخ رابط الملف", "success");
-                    }
-                } catch (err) {
-                    console.error(err);
-                }
+                    url.searchParams.set('i', toNumericId(item.id));
+                    if (navigator.share) await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
+                    else { await navigator.clipboard.writeText(url.toString()); showToast("تم نسخ رابط الملف", "success"); }
+                } catch (err) { console.error(err); }
             };
 
-            let gridClass = "grid gap-3 md:gap-4 ";
-            if (isActivities) {
-                gridClass = "columns-2 md:columns-3 gap-3 space-y-3";
-            } else {
-                gridClass += "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
-            }
+            let gridClass = isActivities ? "columns-2 md:columns-3 gap-3 space-y-3" : "grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
             return (
                 <div className="bg-soft-white p-3 md:p-4 rounded-xl shadow-sm border border-blue-900/10">
-
-                    <div className="flex flex-nowrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-1.5 overflow-x-auto hide-scrollbar">
+                    <div className="flex flex-wrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-2 relative z-40">
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0">
-                                <i className="fa-solid fa-arrow-right text-[10px]"></i>
-                            </button>
+                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-arrow-right text-[10px]"></i></button>
                             <div className="text-blue-900 text-xs hidden sm:block"><i className={`fa-solid ${icon}`}></i></div>
                             <h2 className="text-xs md:text-sm font-black text-gray-800 whitespace-nowrap">{title}</h2>
                         </div>
-
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                             {(!hideYearFilter || showSystemFilter) && (
                                 <>
                                     {!hideYearFilter && (
-                                        <div className="relative">
-                                            <select 
-                                                value={filterYear} 
-                                                onChange={(e) => {setFilterYear(e.target.value); setVisibleCount(6);}} 
-                                                className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800"
-                                            >
-                                                {years.map(y => <option key={y} value={y}>{y}</option>)}
-                                            </select>
-                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
-                                        </div>
+                                        <CustomMobileFilter 
+                                            value={filterYear} 
+                                            options={years} 
+                                            align="right"
+                                            onChange={(val) => {setFilterYear(val); setVisibleCount(6);}} 
+                                        />
                                     )}
-
                                     {showSystemFilter && (
-                                        <div className="relative">
-                                            <select 
-                                                value={filterSystem} 
-                                                onChange={(e) => {setFilterSystem(e.target.value); setVisibleCount(6);}} 
-                                                className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800"
-                                            >
-                                                {systems.map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
-                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
-                                        </div>
+                                        <CustomMobileFilter 
+                                            value={filterSystem} 
+                                            options={systems} 
+                                            align="left" 
+                                            onChange={(val) => {setFilterSystem(val); setVisibleCount(6);}} 
+                                        />
                                     )}
                                 </>
                             )}
                         </div>
                     </div>
-
                     <div className={gridClass}>
-                        {visibleData.length === 0 ? (
-                            <div className="col-span-full text-center py-12 text-gray-400 text-sm font-bold">لا توجد بيانات متاحة حالياً.</div>
-                        ) : (
-                            visibleData.map(item => {
-                                const isVid = isVideoUrl(item.fileUrl);
-                                const numericId = toNumericId(item.id);
-
-                                if (isActivities) {
-                                    return (
-                                        <div key={item.id} id={`card-${numericId}`} className={`optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group`} onClick={() => onPreviewSingle(item.fileUrl)}>
-                                            {isVid && (
-                                                <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
-                                                    <div className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center text-white border-2 border-white/50">
-                                                        <i className="fa-solid fa-play ml-1 text-sm"></i>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <button onClick={(e) => handleShareCard(e, item)} className="absolute top-2 left-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center z-30 opacity-0 group-hover:opacity-100 border border-white/20">
-                                                <i className="fa-solid fa-share-nodes text-xs"></i>
-                                            </button>
-
-                                            <img 
-                                                src={getThumbnail(item.fileUrl, 'default')} 
-                                                alt={item.title} 
-                                                loading="lazy" 
-                                                decoding="async"
-                                                className="w-full h-auto object-cover opacity-90" 
-                                            />
-
-                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-8 text-white z-10 pointer-events-none">
-                                                <h4 className="font-bold text-[11px] md:text-xs leading-tight drop-shadow-lg line-clamp-2">{item.title}</h4>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-
+                        {visibleData.length === 0 ? <div className="col-span-full text-center py-12 text-gray-400 text-sm font-bold">لا توجد بيانات متاحة حالياً.</div> : visibleData.map(item => {
+                            const isVid = isVideoUrl(item.fileUrl);
+                            const numericId = toNumericId(item.id);
+                            if (isActivities) {
                                 return (
-                                    <div key={item.id} id={`card-${numericId}`} className={`optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden`}>
-
-                                        <div className={`relative flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer flex items-center justify-center ${isA4Card ? 'w-20 h-28 sm:w-full sm:h-48' : 'w-24 h-24 sm:w-full sm:h-40'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
-                                            
-                                            <img 
-                                                src={getThumbnail(item.fileUrl, thumbType)} 
-                                                alt={item.title} 
-                                                loading="lazy" 
-                                                decoding="async"
-                                                className="w-full h-full object-cover" 
-                                            />
-                                            
-                                            {item.fileUrl?.endsWith('.pdf') && <div className="absolute bottom-1 right-1 bg-red-600 text-white text-[9px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
-                                            
-                                            {isVid && (
-                                                <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/10">
-                                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black/70 rounded-full flex items-center justify-center text-white border-2 border-white/50">
-                                                        <i className="fa-solid fa-play ml-1 text-xs sm:text-sm"></i>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {showSystemFilter && item.studySystem && item.studySystem !== 'عام' && (
-                                                <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-2 py-0.5 rounded-bl-lg z-20 shadow-sm">
-                                                    {item.studySystem}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-col flex-grow justify-between min-w-0 py-0.5">
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1.5">
-                                                    {!hideYearFilter && (
-                                                        <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100 truncate max-w-[60%]">{item.year}</span>
-                                                    )}
-                                                    {item.createdAt && (
-                                                        <span className="text-[9px] text-gray-400 font-bold" dir="ltr">
-                                                            {formatDate(item.createdAt)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <h4 className="font-bold text-gray-800 leading-snug text-[11px] md:text-xs line-clamp-2" title={item.title}>{item.title}</h4>
-
-                                                {item.description && (
-                                                    <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg max-h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">
-                                                        {item.description}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="flex flex-wrap gap-1.5 mt-2">
-                                                {isA4Card && item.fileUrl && (
-                                                    <>
-                                                        <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100">
-                                                            <i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}
-                                                        </button>
-                                                        <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center">
-                                                            <i className="fa-solid fa-download"></i> تحميل
-                                                        </button>
-                                                        <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100">
-                                                            <i className="fa-solid fa-share-nodes"></i>
-                                                        </button>
-                                                    </>
-                                                )}
-
-                                                {item.link && (
-                                                    <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100">
-                                                        <i className="fa-brands fa-youtube"></i> رابط
-                                                    </a>
-                                                )}
-
-                                                {item.phone && (
-                                                    <>
-                                                        <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center">
-                                                            <i className="fa-brands fa-whatsapp"></i> واتساب
-                                                        </a>
-                                                        <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center">
-                                                            <i className="fa-solid fa-phone"></i>
-                                                        </a>
-                                                        <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100">
-                                                            <i className="fa-solid fa-share-nodes"></i>
-                                                        </button>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
+                                    <div key={item.id} id={`card-${numericId}`} className="optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group" onClick={() => onPreviewSingle(item.fileUrl)}>
+                                        {isVid && <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"><div className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center text-white border-2 border-white/50"><i className="fa-solid fa-play ml-1 text-sm"></i></div></div>}
+                                        <button onClick={(e) => handleShareCard(e, item)} className="absolute top-2 left-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center z-30 opacity-0 group-hover:opacity-100 border border-white/20"><i className="fa-solid fa-share-nodes text-xs"></i></button>
+                                        <img src={getThumbnail(item.fileUrl, 'default')} alt={item.title} loading="lazy" decoding="async" className="w-full h-auto object-cover opacity-90" />
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-8 text-white z-10 pointer-events-none"><h4 className="font-bold text-[11px] md:text-xs leading-tight drop-shadow-lg line-clamp-2">{item.title}</h4></div>
                                     </div>
                                 );
-                            })
-                        )}
+                            }
+                            return (
+                                <div key={item.id} id={`card-${numericId}`} className="optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden transition-all">
+                                    <div className={`relative flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer flex items-center justify-center ${isA4Card ? 'w-20 h-28 sm:w-full sm:h-48' : 'w-24 h-24 sm:w-full sm:h-40'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
+                                        <img src={getThumbnail(item.fileUrl, thumbType)} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                                        {item.fileUrl?.endsWith('.pdf') && <div className="absolute bottom-1 right-1 bg-red-600 text-white text-[9px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
+                                        {isVid && <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/10"><div className="w-8 h-8 sm:w-10 sm:h-10 bg-black/70 rounded-full flex items-center justify-center text-white border-2 border-white/50"><i className="fa-solid fa-play ml-1 text-xs sm:text-sm"></i></div></div>}
+                                        {showSystemFilter && item.studySystem && item.studySystem !== 'عام' && <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-[9px] font-black px-2 py-0.5 rounded-bl-lg z-20 shadow-sm">{item.studySystem}</div>}
+                                    </div>
+                                    <div className="flex flex-col flex-grow justify-between min-w-0 py-0.5">
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                {!hideYearFilter && <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100 truncate max-w-[60%]">{item.year}</span>}
+                                                {item.createdAt && <span className="text-[9px] text-gray-400 font-bold" dir="ltr">{formatDate(item.createdAt)}</span>}
+                                            </div>
+                                            <h4 className="font-bold text-gray-800 leading-snug text-[11px] md:text-xs line-clamp-2" title={item.title}>{item.title}</h4>
+                                            {item.description && <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg max-h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">{item.description}</div>}
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                            {isA4Card && item.fileUrl && (
+                                                <>
+                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100"><i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}</button>
+                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center"><i className="fa-solid fa-download"></i> تحميل</button>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                </>
+                                            )}
+                                            {item.link && <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100"><i className="fa-brands fa-youtube"></i> رابط</a>}
+                                            {item.phone && (
+                                                <>
+                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center"><i className="fa-brands fa-whatsapp"></i> واتساب</a>
+                                                    <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center"><i className="fa-solid fa-phone"></i></a>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
-
                     {visibleCount < filtered.length && (
                         <div className="text-center mt-5">
-                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm">
-                                عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i>
-                            </button>
+                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm">عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i></button>
                         </div>
                     )}
                 </div>
             );
         });
 
-        // السلايدر المحدث: الهيكل يطابق الشكل النهائي تماماً بدون نبض
         const HomeSlider = React.memo(({ schedules, onPreviewSlider }) => {
             const[idx, setIdx] = useState(0);
-
             if (!schedules || schedules.length === 0) {
                 return (
                     <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-200 bg-gray-100">
-                        <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500 min-h-[28px] md:min-h-[36px]">
-                            {"\u00A0"}
-                        </div>
+                        <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500 min-h-[28px] md:min-h-[36px]">{"\u00A0"}</div>
                         <div className="h-40 md:h-72 relative overflow-hidden flex items-center justify-center">
                             <div className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center opacity-50"><i className="fa-solid fa-chevron-left text-xs"></i></div>
                             <div className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center opacity-50"><i className="fa-solid fa-chevron-right text-xs"></i></div>
                         </div>
-                        <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">
-                            <div className="h-1 rounded-full w-5 bg-blue-900/30"></div>
-                            <div className="h-1 rounded-full w-1.5 bg-gray-300"></div>
-                        </div>
+                        <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100"><div className="h-1 rounded-full w-5 bg-blue-900/30"></div><div className="h-1 rounded-full w-1.5 bg-gray-300"></div></div>
                     </div>
                 );
             }
-
             return (
                 <div className="relative w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-gray-200 group bg-gray-100">
-                    <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500 min-h-[28px] md:min-h-[36px]">
-                        {schedules[idx].title || 'جداول المحاضرات الرسمية'}
-                    </div>
+                    <div className="bg-blue-900 text-white text-center py-1.5 md:py-2 text-xs md:text-sm font-bold border-b border-yellow-500 min-h-[28px] md:min-h-[36px]">{schedules[idx].title || 'جداول المحاضرات الرسمية'}</div>
                     <div className="h-40 md:h-72 relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => onPreviewSlider(schedules, idx)}>
-                        <img 
-                            src={getThumbnail(schedules[idx].url, 'slider')} 
-                            className="w-full h-full object-contain scale-[1.02]" 
-                            decoding="sync"
-                            fetchpriority={idx === 0 ? "high" : "auto"}
-                            loading={idx === 0 ? "eager" : "lazy"}
-                            alt={schedules[idx].title || "جدول"}
-                        />
+                        <img src={getThumbnail(schedules[idx].url, 'slider')} className="w-full h-full object-contain scale-[1.02]" decoding="sync" fetchpriority={idx === 0 ? "high" : "auto"} loading={idx === 0 ? "eager" : "lazy"} alt={schedules[idx].title || "جدول"} />
                         {schedules.length > 1 && (
                             <>
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIdx(i => (i-1+schedules.length)%schedules.length); }} className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white w-7 h-7 rounded-full z-20 flex items-center justify-center"><i className="fa-solid fa-chevron-left text-xs"></i></button>
@@ -518,50 +407,63 @@
                             </>
                         )}
                     </div>
-                    {schedules.length > 1 && (
-                        <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">
-                            {schedules.map((_, i) => <div key={i} className={`h-1 rounded-full ${i === idx ? 'w-5 bg-blue-900' : 'w-1.5 bg-gray-300'}`}></div>)}
+                    {schedules.length > 1 && <div className="flex justify-center gap-1 py-1.5 bg-gray-50 border-t border-gray-100">{schedules.map((_, i) => <div key={i} className={`h-1 rounded-full ${i === idx ? 'w-5 bg-blue-900' : 'w-1.5 bg-gray-300'}`}></div>)}</div>}
+                </div>
+            );
+        });
+
+        const InternalBrowser = React.memo(({ isOpen, onClose, url, title }) => {
+            const[iframeLoading, setIframeLoading] = useState(true);
+            useEffect(() => { if (isOpen) setIframeLoading(true); }, [isOpen]);
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-[99999] bg-black flex flex-col">
+                    <div className="bg-blue-950 text-white h-14 flex items-center justify-between px-4 shadow-md z-10 border-b border-blue-800">
+                        <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center"><i className="fa-solid fa-laptop-file text-blue-300 text-sm"></i></div>
+                            <span className="font-bold text-sm md:text-base">{title}</span>
                         </div>
-                    )}
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => window.open(url, '_blank')} className="text-blue-300 hover:text-white text-[10px] md:text-xs flex items-center gap-1 bg-white/5 px-2 py-1.5 rounded-lg border border-blue-800"><i className="fa-solid fa-arrow-up-right-from-square"></i> فتح بالمتصفح</button>
+                            <button onClick={onClose} className="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg border border-red-500"><i className="fa-solid fa-xmark text-lg"></i></button>
+                        </div>
+                    </div>
+                    <div className="flex-1 w-full bg-gray-100 relative overflow-hidden">
+                        {iframeLoading && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
+                                <i className="fa-solid fa-circle-notch fa-spin text-blue-900 text-3xl mb-2" style={{animation: 'fa-spin 2s infinite linear !important'}}></i>
+                                <span className="text-blue-900 font-bold text-xs mt-2">جاري تحميل الخدمات...</span>
+                            </div>
+                        )}
+                        <iframe onLoad={() => setIframeLoading(false)} src={url} className="w-full h-full border-0 absolute inset-0 z-10 bg-white" title={title} sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
+                    </div>
                 </div>
             );
         });
 
         const App = () => {
-            const[user, setUser] = useState(null);
-            const[isAdmin, setIsAdmin] = useState(false);
             const[page, setPage] = useState('home');
             const[initialFilters, setInitialFilters] = useState({ year: 'اختار الفرقة', system: 'اختار النظام' });
             const[highlightedItemId, setHighlightedItemId] = useState(null);
             const[materials, setMaterials] = useState([]);
             const[schedules, setSchedules] = useState([]);
-
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const[previewData, setPreviewData] = useState({ items:[], index: -1 });
             const[downloadItem, setDownloadItem] = useState(null); 
             const[toast, setToast] = useState({ message: '', type: '' });
-            
             const[externalSiteOpen, setExternalSiteOpen] = useState(false);
-            const[iframeLoading, setIframeLoading] = useState(true);
 
-            // مرجع لحفظ أماكن النزول (Scroll Position) لكل صفحة
             const scrollPositions = useRef({});
             const currentPageRef = useRef(page);
 
-            // تحديث المرجع بالصفحة الحالية دائماً
-            useEffect(() => {
-                currentPageRef.current = page;
-            },[page]);
+            useEffect(() => { currentPageRef.current = page; },[page]);
 
             const showToast = useCallback((message, type = 'info', duration = 2500) => {
                 setToast({ message, type });
                 if (duration) setTimeout(() => setToast({ message: '', type: '' }), duration);
             },[]);
 
-            const openSinglePreview = useCallback((url) => {
-                if(url) setPreviewData({ items: [{ url }], index: 0 });
-            },[]);
-
+            const openSinglePreview = useCallback((url) => { if(url) setPreviewData({ items: [{ url }], index: 0 }); },[]);
             const openSliderPreview = useCallback((schedulesArray, clickedIndex) => {
                 const items = schedulesArray.map(s => ({ url: s.url }));
                 setPreviewData({ items, index: clickedIndex });
@@ -576,45 +478,31 @@
                 });
             },[]);
 
-            const handleCleanSite = () => {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.reload(true);
-            };
+            const handleCleanSite = () => { localStorage.clear(); sessionStorage.clear(); window.location.reload(true); };
 
-            const handleRequestDownload = useCallback((url, title) => {
-                setDownloadItem({ url, title });
-            },[]);
+            const handleRequestDownload = useCallback((url, title) => { setDownloadItem({ url, title }); },[]);
 
             const executeDownload = async () => {
                 if (!downloadItem) return;
                 const { url, title } = downloadItem;
                 setDownloadItem(null);
-
                 showToast("جاري تجهيز الملف...", "info", 2000);
 
                 try {
                     const dlUrl = url.includes('cloudinary.com') ? url.replace('/upload/', '/upload/fl_attachment/') : url;
                     const response = await fetch(dlUrl);
                     if (!response.ok) throw new Error('Network error');
-
                     const blob = await response.blob();
                     const blobUrl = window.URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.href = blobUrl;
-
                     let ext = 'pdf'; 
-                    if (url.includes('.')) {
-                        const parts = url.split('.');
-                        ext = parts[parts.length - 1].split('?')[0].split('#')[0];
-                    }
-
+                    if (url.includes('.')) { const parts = url.split('.'); ext = parts[parts.length - 1].split('?')[0].split('#')[0]; }
                     link.download = `${title}.${ext}`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(blobUrl);
-
                     showToast("بدأ التحميل بنجاح", "success");
                 } catch (error) {
                     const dlUrl = url.includes('cloudinary.com') ? url.replace('/upload/', '/upload/fl_attachment/') : url;
@@ -627,76 +515,53 @@
                 }
             };
 
-            // دالة التنقل المحمية والمحدثة
+            // 🌟 إزالة اللاج (Lag) باستخدام startTransition وتأخير زمني بسيط لتفريغ المعالج
             const navigate = useCallback((pg) => {
                 try {
-                    setIsMobileMenuOpen(false);
-                    setHighlightedItemId(null);
-
-                    // حفظ مكان النزول للصفحة الحالية قبل المغادرة
-                    if (currentPageRef.current) {
-                        scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    }
-
-                    // تحديث الرابط في المتصفح لدعم زر الرجوع
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('p', pg);
-                    url.searchParams.delete('i');
-                    url.searchParams.delete('page');
-                    url.searchParams.delete('item');
+                    setIsMobileMenuOpen(false); setHighlightedItemId(null);
+                    if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
+                    
+                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
+                    const url = new URL(basePath);
+                    if (pg !== 'home') url.searchParams.set('p', pg);
                     window.history.pushState({ page: pg }, '', url.toString());
-
-                    // الانتقال الفوري
-                    setPage(pg);
-
-                    // استعادة مكان النزول للصفحة الجديدة أو الصعود للأعلى
+                    
+                    // منع تجميد المتصفح أثناء التبديل بين الأقسام
                     setTimeout(() => {
-                        const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0;
-                        window.scrollTo({ top: topPos, behavior: 'instant' });
-                    }, 0);
-                } catch (err) {
-                    console.error("Navigation Error:", err);
-                    setPage(pg);
-                    window.scrollTo(0, 0);
-                }
+                        React.startTransition(() => {
+                            setPage(pg);
+                        });
+                        setTimeout(() => { 
+                            const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; 
+                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
+                        }, 10);
+                    }, 5);
+
+                } catch (err) { setPage(pg); window.scrollTo(0, 0); }
             },[]);
 
-            // دالة الرجوع المضمونة للأقسام (تعود للرئيسية دائماً وفي نفس المكان)
             const goBack = useCallback(() => {
                 try {
-                    // حفظ مكان النزول للقسم الحالي
-                    if (currentPageRef.current) {
-                        scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    }
-
-                    // تحديث الرابط ليكون الرئيسية
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('p');
-                    url.searchParams.delete('i');
-                    url.searchParams.delete('page');
-                    url.searchParams.delete('item');
+                    if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
+                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
+                    const url = new URL(basePath);
                     window.history.pushState({ page: 'home' }, '', url.toString());
-
-                    setPage('home');
-
-                    // استعادة مكان النزول للصفحة الرئيسية
+                    
                     setTimeout(() => {
-                        const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0;
-                        window.scrollTo({ top: topPos, behavior: 'instant' });
-                    }, 0);
+                        React.startTransition(() => {
+                            setPage('home');
+                        });
+                        setTimeout(() => { 
+                            const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0; 
+                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
+                        }, 10);
+                    }, 5);
 
-                } catch (err) {
-                    navigate('home');
-                }
+                } catch (err) { navigate('home'); }
             }, [navigate]);
 
-            // التأثير الأساسي (يعمل مرة واحدة فقط عند فتح الموقع)
             useEffect(() => {
-                // إشعار الترحيب الجديد
-                const welcomeTimer = setTimeout(() => {
-                    showToast("أهلاً بكم في منصتي التعليمية", "success", 3000);
-                }, 1500);
-
+                const welcomeTimer = setTimeout(() => showToast("أهلاً بكم في منصتي التعليمية", "success", 3000), 1500);
                 try {
                     const params = new URLSearchParams(window.location.search);
                     const pageParam = params.get('page') || params.get('p');
@@ -704,152 +569,85 @@
 
                     const resolveYear = (val) => {
                         if(!val) return 'اختار الفرقة';
-                        if(val === '1') return 'الفرقة الأولى';
-                        if(val === '2') return 'الفرقة الثانية';
-                        if(val === '3') return 'الفرقة الثالثة';
-                        if(val === '4') return 'الفرقة الرابعة';
-                        if(val === 'all') return 'كل الفرق';
-                        if(val.includes('الفرقة') || val === 'كل الفرق') return val; 
-                        return 'اختار الفرقة';
+                        if(val === '1') return 'الفرقة الأولى'; if(val === '2') return 'الفرقة الثانية'; if(val === '3') return 'الفرقة الثالثة'; if(val === '4') return 'الفرقة الرابعة'; if(val === 'all') return 'كل الفرق';
+                        if(val.includes('الفرقة') || val === 'كل الفرق') return val; return 'اختار الفرقة';
                     };
                     const resolveSystem = (val) => {
                         if(!val) return 'اختار النظام';
-                        if(val === 'r') return 'انتظام';
-                        if(val === 'a') return 'انتساب';
-                        if(val === 'انتظام' || val === 'انتساب') return val; 
-                        return 'اختار النظام';
+                        if(val === 'r') return 'انتظام'; if(val === 'a') return 'انتساب';
+                        if(val === 'انتظام' || val === 'انتساب') return val; return 'اختار النظام';
                     };
 
                     if (pageParam) {
                         setPage(pageParam);
-                        setInitialFilters({
-                            year: resolveYear(params.get('y') || params.get('year')),
-                            system: resolveSystem(params.get('s') || params.get('system'))
-                        });
-
+                        setInitialFilters({ year: resolveYear(params.get('y') || params.get('year')), system: resolveSystem(params.get('s') || params.get('system')) });
+                        
+                        // 🌟 النزول لبطاقة محددة وعمل Highlight وميض أزرق
                         if(itemParam) {
                             setHighlightedItemId(itemParam);
-                            setTimeout(() => {
-                                const el = document.getElementById(`card-${itemParam}`);
-                                if(el) {
-                                    const y = el.getBoundingClientRect().top + window.scrollY - 100;
-                                    window.scrollTo({ top: y, behavior: 'smooth' });
-                                }
+                            setTimeout(() => { 
+                                const el = document.getElementById(`card-${itemParam}`); 
+                                if(el) { 
+                                    const y = el.getBoundingClientRect().top + window.scrollY - 100; 
+                                    window.scrollTo({ top: y, behavior: 'smooth' }); 
+                                    
+                                    el.classList.add('highlight-target');
+                                    setTimeout(() => el.classList.remove('highlight-target'), 3000);
+                                } 
                             }, 800);
                         }
-                        window.history.replaceState({ page: pageParam }, document.title, window.location.href);
-                    } else {
-                        window.history.replaceState({ page: 'home' }, document.title, window.location.href);
+                        
+                        let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
+                        const url = new URL(basePath);
+                        url.searchParams.set('p', pageParam);
+                        if(itemParam) url.searchParams.set('i', itemParam);
+                        window.history.replaceState({ page: pageParam }, document.title, url.toString());
+                    } else { 
+                        let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
+                        window.history.replaceState({ page: 'home' }, document.title, basePath); 
                     }
-                } catch (err) {
-                    console.error("Init Error:", err);
-                }
-
-                onAuthStateChanged(auth, (u) => {
-                    setUser(u);
-                    setIsAdmin(u && u.uid === ADMIN_UID);
-                });
+                } catch (err) { console.error("Init Error:", err); }
 
                 const qMat = query(collection(db, 'materials'), orderBy('createdAt', 'desc'), limit(150));
-                const unsubMat = onSnapshot(qMat, { includeMetadataChanges: true }, (snap) => {
-                    setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                });
+                const unsubMat = onSnapshot(qMat, { includeMetadataChanges: true }, (snap) => setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => setSchedules(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
 
-                const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => {
-                    setSchedules(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-                });
+                return () => { unsubMat(); unsubSch(); clearTimeout(welcomeTimer); };
+            },[]);
 
-                return () => { 
-                    unsubMat(); 
-                    unsubSch(); 
-                    clearTimeout(welcomeTimer); 
-                };
-            },[]); // مصفوفة فارغة لمنع إعادة التحميل عند التنقل
-
-            // مستمع لزر الرجوع في المتصفح أو الهاتف
             useEffect(() => {
                 const handlePopState = (e) => {
                     try {
                         const params = new URLSearchParams(window.location.search);
                         const pg = params.get('p') || params.get('page') || 'home';
+                        if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
                         
-                        if (currentPageRef.current) {
-                            scrollPositions.current[currentPageRef.current] = window.scrollY;
-                        }
+                        React.startTransition(() => {
+                            setPage(pg);
+                        });
                         
-                        setPage(pg);
-                        
-                        setTimeout(() => {
-                            const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0;
-                            window.scrollTo({ top: topPos, behavior: 'instant' });
-                        }, 0);
-                    } catch (err) {
-                        console.error("PopState Error:", err);
-                    }
+                        setTimeout(() => { 
+                            const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; 
+                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
+                        }, 10);
+                    } catch (err) {}
                 };
                 window.addEventListener('popstate', handlePopState);
                 return () => window.removeEventListener('popstate', handlePopState);
             },[]);
 
-            const getByType = useCallback((type) => {
-                return materials.filter(m => m.sectionType === type);
-            },[materials]);
+            const getByType = useCallback((type) => materials.filter(m => m.sectionType === type),[materials]);
 
             return (
                 <div className="min-h-screen flex flex-col relative">
-
                     <Toast message={toast.message} type={toast.type} />
-
-                    <PreviewModal 
-                        previewData={previewData} 
-                        onClose={() => setPreviewData({ items:[], index: -1 })} 
-                        onNavigate={handleModalNavigate}
-                    />
-
-                    {externalSiteOpen && (
-                        <div className="fixed inset-0 z-[99999] bg-black flex flex-col">
-                            <div className="bg-blue-950 text-white h-14 flex items-center justify-between px-4 shadow-md z-10 border-b border-blue-800">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
-                                        <i className="fa-solid fa-laptop-file text-blue-300 text-sm"></i>
-                                    </div>
-                                    <span className="font-bold text-sm md:text-base">خدمات الطلاب</span>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <button onClick={() => window.open('https://faculty-of-commerce.netlify.app/', '_blank')} className="text-blue-300 hover:text-white text-[10px] md:text-xs flex items-center gap-1 bg-white/5 px-2 py-1.5 rounded-lg border border-blue-800">
-                                        <i className="fa-solid fa-arrow-up-right-from-square"></i> فتح بالمتصفح
-                                    </button>
-                                    <button onClick={() => setExternalSiteOpen(false)} className="bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-lg border border-red-500">
-                                        <i className="fa-solid fa-xmark text-lg"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="flex-1 w-full bg-gray-100 relative overflow-hidden">
-                                
-                                {iframeLoading && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
-                                        <i className="fa-solid fa-circle-notch fa-spin text-blue-900 text-3xl mb-2" style={{animation: 'fa-spin 2s infinite linear !important'}}></i>
-                                        <span className="text-blue-900 font-bold text-xs mt-2">جاري تحميل الخدمات...</span>
-                                    </div>
-                                )}
-
-                                <iframe
-                                    onLoad={() => setIframeLoading(false)}
-                                    src="https://faculty-of-commerce.netlify.app/"
-                                    className="w-full h-full border-0 absolute inset-0 z-10 bg-white"
-                                    title="موقع خدمات الطلاب"
-                                    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-                                ></iframe>
-                            </div>
-                        </div>
-                    )}
+                    <PreviewModal previewData={previewData} onClose={() => setPreviewData({ items:[], index: -1 })} onNavigate={handleModalNavigate} />
+                    <InternalBrowser isOpen={externalSiteOpen} onClose={() => setExternalSiteOpen(false)} url="https://faculty-of-commerce.netlify.app/" title="خدمات الطلاب" />
 
                     {downloadItem && (
                         <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
                             <div className="bg-soft-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
-                                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-2xl border border-blue-200">
-                                    <i className="fa-solid fa-cloud-arrow-down"></i>
-                                </div>
+                                <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-600 text-2xl border border-blue-200"><i className="fa-solid fa-cloud-arrow-down"></i></div>
                                 <h3 className="text-base font-bold text-gray-800 mb-2">تأكيد التحميل</h3>
                                 <p className="text-gray-500 mb-5 text-xs font-bold leading-relaxed">{downloadItem.title}</p>
                                 <div className="flex gap-2">
@@ -863,12 +661,9 @@
                     <nav className="bg-blue-900 text-white sticky top-0 z-40 shadow-lg border-b-2 border-yellow-500">
                         <div className="w-full px-4 lg:px-8 flex justify-between items-center h-14 md:h-16">
                             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('home')}>
-                                <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner">
-                                    <i className="fa-solid fa-graduation-cap text-sm md:text-lg"></i>
-                                </div>
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner"><i className="fa-solid fa-graduation-cap text-sm md:text-lg"></i></div>
                                 <span className="font-black text-base md:text-xl tracking-tighter">تجارة الزقازيق</span>
                             </div>
-
                             <div className="hidden lg:flex items-center gap-1 text-xs md:text-sm">
                                 <button onClick={() => navigate('home')} className={`px-3 py-4 md:py-5 ${page === 'home' ? 'nav-link-active' : ''}`}>الرئيسية</button>
                                 <button onClick={() => navigate('lectures')} className={`px-3 py-4 md:py-5 ${page === 'lectures' ? 'nav-link-active' : ''}`}>المحاضرات</button>
@@ -877,16 +672,8 @@
                                 <button onClick={() => navigate('activities')} className={`px-3 py-4 md:py-5 ${page === 'activities' ? 'nav-link-active' : ''}`}>الأنشطة</button>
                                 <button onClick={() => navigate('training')} className={`px-3 py-4 md:py-5 ${page === 'training' ? 'nav-link-active' : ''}`}>التدريب</button>
                                 <button onClick={() => navigate('jobs')} className={`px-3 py-4 md:py-5 ${page === 'jobs' ? 'nav-link-active' : ''}`}>الوظائف</button>
-
-                                <button onClick={() => navigate(isAdmin ? 'adminDash' : 'admin')} className="mr-3 bg-gradient-to-l from-yellow-400 to-yellow-500 text-blue-950 px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs shadow-sm flex items-center gap-1.5">
-                                    <i className={`fa-solid ${isAdmin ? 'fa-user-shield' : 'fa-right-to-bracket'}`}></i>
-                                    {isAdmin ? 'الإدارة' : 'دخول'}
-                                </button>
                             </div>
-
-                            <button className="lg:hidden text-xl p-2" onClick={() => setIsMobileMenuOpen(true)}>
-                                <i className="fa-solid fa-bars"></i>
-                            </button>
+                            <button className="lg:hidden text-xl p-2" onClick={() => setIsMobileMenuOpen(true)}><i className="fa-solid fa-bars"></i></button>
                         </div>
                     </nav>
 
@@ -907,56 +694,29 @@
                             <SidebarBtn icon="fa-briefcase" label="الوظائف" active={page==='jobs'} onClick={() => navigate('jobs')} />
                             <SidebarBtn icon="fa-map-location" label="دليل الطالب" active={page==='guide'} onClick={() => navigate('guide')} />
                             <SidebarBtn icon="fa-circle-info" label="من نحن" active={page==='about'} onClick={() => navigate('about')} />
-
                             <hr className="my-1 border-gray-200 w-full" />
-
-                            <button onClick={handleCleanSite} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-sm mt-1 border border-teal-600">
-                                <i className="fa-solid fa-broom"></i>
-                                تنظيف الموقع
-                            </button>
-
-                            <button onClick={() => navigate(isAdmin ? 'adminDash' : 'admin')} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 shadow-sm mt-1 border border-yellow-600">
-                                <i className={`fa-solid ${isAdmin ? 'fa-user-shield' : 'fa-right-to-bracket'}`}></i>
-                                {isAdmin ? 'الإدارة' : 'تسجيل الدخول'}
-                            </button>
+                            <button onClick={() => window.location.href = 'admin.html'} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 shadow-sm mt-1 border border-yellow-600"><i className="fa-solid fa-user-shield"></i> الإدارة المحمية</button>
+                            <button onClick={handleCleanSite} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-sm mt-1 border border-teal-600"><i className="fa-solid fa-broom"></i> تنظيف الموقع</button>
                         </div>
                     </div>
 
                     <main className="flex-grow container mx-auto px-3 md:px-4 py-4 md:py-6 max-w-5xl relative">
-
                         <AdSlot id="top-ad" />
-
                         {page === 'home' && (
                             <div className="space-y-6 md:space-y-8">
                                 <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-56 shadow-lg">
-                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
+                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:low,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-950/85 via-blue-900/45 to-transparent flex flex-col justify-center items-center text-center px-6 md:px-8 text-white">
                                         <h2 className="text-2xl md:text-3xl font-black mb-1 md:mb-2 drop-shadow-lg">بوابة كلية التجارة</h2>
                                         <p className="opacity-90 font-bold text-xs md:text-sm drop-shadow-md">جامعة الزقازيق - شهاب طارق صلاح</p>
                                     </div>
                                 </div>
-
-                                <HomeSlider 
-                                    schedules={schedules} 
-                                    onPreviewSlider={openSliderPreview} 
-                                />
-
+                                <HomeSlider schedules={schedules} onPreviewSlider={openSliderPreview} />
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                                    <div 
-                                        onClick={() => {setIframeLoading(true); setExternalSiteOpen(true);}}
-                                        className="col-span-2 md:col-span-2 bg-gradient-to-r from-blue-800 to-indigo-900 p-3 md:p-4 rounded-xl text-white flex items-center gap-3 shadow-md cursor-pointer border border-blue-400/30"
-                                    >
-                                        <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner flex-shrink-0">
-                                            <i className="fa-solid fa-graduation-cap text-lg md:text-xl"></i>
-                                        </div>
-                                        <div className="flex flex-col justify-center">
-                                            <h3 className="font-black text-xs md:text-sm drop-shadow-md leading-tight mb-1">موقع خدمات طلاب كلية تجارة الزقازيق</h3>
-                                            <p className="text-[9px] md:text-[11px] text-blue-200 font-bold bg-black/20 w-fit px-2 py-0.5 rounded-full">
-                                                اضغط لفتح الموقع
-                                            </p>
-                                        </div>
+                                    <div onClick={() => setExternalSiteOpen(true)} className="col-span-2 md:col-span-2 bg-gradient-to-r from-blue-800 to-indigo-900 p-3 md:p-4 rounded-xl text-white flex items-center gap-3 shadow-md cursor-pointer border border-blue-400/30">
+                                        <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-inner flex-shrink-0"><i className="fa-solid fa-graduation-cap text-lg md:text-xl"></i></div>
+                                        <div className="flex flex-col justify-center"><h3 className="font-black text-xs md:text-sm drop-shadow-md leading-tight mb-1">موقع خدمات طلاب كلية تجارة الزقازيق</h3><p className="text-[9px] md:text-[11px] text-blue-200 font-bold bg-black/20 w-fit px-2 py-0.5 rounded-full">اضغط لفتح الموقع</p></div>
                                     </div>
-
                                     <HomeCard icon="fa-person-chalkboard" label="المحاضرات" color="bg-blue-600" onClick={() => navigate('lectures')} />
                                     <HomeCard icon="fa-book" label="المذكرات" color="bg-indigo-600" onClick={() => navigate('notes')} />
                                     <HomeCard icon="fa-file-shield" label="المراجعات" color="bg-red-600" onClick={() => navigate('reviews')} />
@@ -976,27 +736,16 @@
                         {page === 'training' && <SectionView type="training" title="التدريب والكورسات" icon="fa-graduation-cap" data={getByType('training')} onBack={goBack} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'jobs' && <SectionView type="jobs" title="الوظائف المتاحة" icon="fa-briefcase" data={getByType('jobs')} hideYearFilter={true} onBack={goBack} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
                         {page === 'guide' && <SectionView type="guide" title="دليل الطالب" icon="fa-map-location" data={getByType('guide')} showSystemFilter={true} onBack={goBack} onPreviewSingle={openSinglePreview} onRequestDownload={handleRequestDownload} initialFilters={initialFilters} showToast={showToast} highlightedItemId={highlightedItemId} />}
-
                         {page === 'about' && <AboutPage onBack={goBack} />}
-                        {page === 'admin' && !isAdmin && <AdminLogin onSuccess={() => { showToast("تم تسجيل الدخول بنجاح", "success"); navigate('adminDash'); }} showToast={showToast} />}
-                        {page === 'adminDash' && isAdmin && <AdminDashboard materials={materials} schedules={schedules} onBack={goBack} showToast={showToast} />}
 
                         <AdSlot id="bottom-ad" />
                     </main>
 
                     <div className="lg:hidden fixed bottom-0 w-full bg-soft-white border-t border-blue-900/10 flex text-blue-900 z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.03)] rounded-t-xl overflow-hidden">
-                        <button onClick={() => navigate('home')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'home' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}>
-                            <i className="fa-solid fa-house text-lg"></i><span className="text-[10px] mt-1 font-bold">الرئيسية</span>
-                        </button>
-                        <button onClick={() => navigate('lectures')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'lectures' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}>
-                            <i className="fa-solid fa-person-chalkboard text-lg"></i><span className="text-[10px] mt-1 font-bold">المحاضرات</span>
-                        </button>
-                        <button onClick={() => navigate('notes')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'notes' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}>
-                            <i className="fa-solid fa-book text-lg"></i><span className="text-[10px] mt-1 font-bold">المذكرات</span>
-                        </button>
-                        <button onClick={() => navigate('activities')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'activities' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}>
-                            <i className="fa-solid fa-users-gear text-lg"></i><span className="text-[10px] mt-1 font-bold">الأنشطة</span>
-                        </button>
+                        <button onClick={() => navigate('home')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'home' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}><i className="fa-solid fa-house text-lg"></i><span className="text-[10px] mt-1 font-bold">الرئيسية</span></button>
+                        <button onClick={() => navigate('lectures')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'lectures' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}><i className="fa-solid fa-person-chalkboard text-lg"></i><span className="text-[10px] mt-1 font-bold">المحاضرات</span></button>
+                        <button onClick={() => navigate('notes')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'notes' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}><i className="fa-solid fa-book text-lg"></i><span className="text-[10px] mt-1 font-bold">المذكرات</span></button>
+                        <button onClick={() => navigate('activities')} className={`flex-1 flex flex-col items-center justify-center py-3 ${page === 'activities' ? 'text-yellow-600 bg-blue-50/50' : 'text-blue-900'}`}><i className="fa-solid fa-users-gear text-lg"></i><span className="text-[10px] mt-1 font-bold">الأنشطة</span></button>
                     </div>
 
                     { (page === 'home' || page === 'about') && (
@@ -1018,324 +767,25 @@
 
         const SidebarBtn = React.memo(({ icon, label, active, onClick, color="text-gray-700" }) => (
             <button onClick={onClick} className={`flex items-center gap-2 w-full p-2.5 rounded-lg font-bold text-[11px] md:text-xs border-r-4 ${active ? 'bg-blue-50 text-blue-900 border-blue-900' : `border-transparent ${color}`}`}>
-                <div className="w-5 flex justify-center"><i className={`fa-solid ${icon} text-sm md:text-base`}></i></div>
-                <span className="text-right flex-1">{label}</span>
+                <div className="w-5 flex justify-center"><i className={`fa-solid ${icon} text-sm md:text-base`}></i></div><span className="text-right flex-1">{label}</span>
             </button>
         ));
 
         const HomeCard = React.memo(({ icon, label, color, onClick }) => (
             <div onClick={onClick} className={`${color} p-3 md:p-4 rounded-xl text-white flex flex-col items-center justify-center gap-1.5 shadow-sm cursor-pointer border border-white/20`}>
-                <i className={`fa-solid ${icon} text-xl md:text-2xl`}></i>
-                <span className="font-bold text-[10px] md:text-xs">{label}</span>
+                <i className={`fa-solid ${icon} text-xl md:text-2xl`}></i><span className="font-bold text-[10px] md:text-xs">{label}</span>
             </div>
         ));
-
-        const AdminLogin = ({ onSuccess, showToast }) => {
-            const[e, setE] = useState('');
-            const[p, setP] = useState('');
-            const handle = async () => {
-                showToast("جاري التحقق...", "info", 1000);
-                try {
-                    const cred = await signInWithEmailAndPassword(auth, e, p);
-                    if (cred.user.uid === ADMIN_UID) onSuccess();
-                    else showToast("ليس لديك صلاحية الدخول", "error");
-                } catch { showToast("خطأ في البريد أو كلمة المرور", "error"); }
-            };
-            return (
-                <div className="max-w-md mx-auto bg-soft-white p-6 md:p-8 rounded-xl shadow-sm border border-blue-900/10 mt-6 md:mt-10">
-                    <h2 className="text-xl md:text-2xl font-bold mb-6 text-center text-blue-900">تسجيل دخول الإدارة</h2>
-                    <input type="email" placeholder="البريد" className="w-full mb-3 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-900 bg-white text-sm" onChange={v=>setE(v.target.value)} />
-                    <input type="password" placeholder="كلمة المرور" className="w-full mb-5 border border-gray-200 p-2.5 rounded-lg focus:outline-none focus:border-blue-900 bg-white text-sm" onChange={v=>setP(v.target.value)} />
-                    <button onClick={handle} className="w-full bg-blue-900 text-white py-2.5 rounded-lg font-bold shadow-sm text-sm">دخول</button>
-                </div>
-            );
-        };
-
-        const AdminDashboard = ({ materials, schedules, onBack, showToast }) => {
-            const[title, setTitle] = useState('');
-            const[sec, setSec] = useState('lectures');
-            const[year, setYear] = useState('الفرقة الأولى');
-            const[studySystem, setStudySystem] = useState('عام');
-            const[link, setLink] = useState('');
-            const[phone, setPhone] = useState('');
-            const[description, setDescription] = useState('');
-            const[loading, setLoading] = useState(false);
-            const[uploadProgress, setUploadProgress] = useState(0);
-            const[uploadQueue, setUploadQueue] = useState([]);
-
-            const[confirmDelete, setConfirmDelete] = useState(null);
-
-            const handleFileChange = (e) => {
-                const files = Array.from(e.target.files);
-                setUploadQueue(files.map(f => {
-                    const isMedia = f.type.startsWith('image/') || f.type.startsWith('video/');
-                    return { file: f, title: isMedia ? '' : f.name.split('.')[0] };
-                }));
-            };
-
-            const uploadFileWithProgress = (file, isCompressed) => {
-                return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.timeout = 0; 
-                    
-                    xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`);
-
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            const percent = Math.round((e.loaded / e.total) * 100);
-                            setUploadProgress(isCompressed ? 40 + Math.floor(percent * 0.6) : percent);
-                        }
-                    };
-
-                    xhr.onload = () => {
-                        if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
-                        else reject(JSON.parse(xhr.responseText));
-                    };
-                    xhr.onerror = () => reject("Network Error");
-
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', UPLOAD_PRESET);
-                    xhr.send(formData);
-                });
-            };
-
-            const upload = async () => {
-                setLoading(true);
-                setUploadProgress(0);
-                try {
-                    const { default: imageCompression } = await import('https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/+esm');
-
-                    const finalStudySystem = (sec === 'lectures' || sec === 'notes' || sec === 'reviews' || sec === 'guide') ? studySystem : 'عام';
-
-                    if (uploadQueue.length > 0) {
-                        const hasEmptyTitles = uploadQueue.some(item => !item.title || !item.title.trim());
-                        if (hasEmptyTitles) {
-                            showToast("الرجاء كتابة وصف/عنوان لجميع الملفات المحددة", "error");
-                            setLoading(false);
-                            return;
-                        }
-
-                        for (let i=0; i<uploadQueue.length; i++) {
-                            const item = uploadQueue[i];
-                            setUploadProgress(0);
-
-                            let fileUrl = null;
-                            let fileToUpload = item.file;
-                            let isPdf = fileToUpload.type === 'application/pdf' || fileToUpload.name.toLowerCase().endsWith('.pdf');
-                            let isVideo = fileToUpload.type.startsWith('video/');
-                            let isCompressed = false;
-
-                            if (fileToUpload.type.startsWith('image/')) {
-                                if (fileToUpload.size > 500 * 1024) { 
-                                    showToast(`جاري ضغط الصورة (${i+1}/${uploadQueue.length})...`, "info", 0);
-                                    try {
-                                        fileToUpload = await imageCompression(fileToUpload, { 
-                                            maxSizeMB: 0.5, 
-                                            maxWidthOrHeight: 1000, 
-                                            useWebWorker: true,
-                                            initialQuality: 0.6,
-                                            onProgress: (p) => setUploadProgress(Math.floor(p * 0.4)) 
-                                        });
-                                        isCompressed = true;
-                                    } catch (e) { 
-                                        console.error("Compression failed", e); 
-                                    }
-                                }
-                            }
-
-                            showToast(`جاري الرفع للسيرفر (${i+1}/${uploadQueue.length})... قد يستغرق وقتاً للملفات الكبيرة`, "info", 0);
-                            const d = await uploadFileWithProgress(fileToUpload, isCompressed);
-
-                            if (!isPdf && !isVideo && d.secure_url.includes('/image/upload/')) {
-                                fileUrl = d.secure_url.replace('/upload/', '/upload/w_1000,q_auto,f_auto/');
-                            } else {
-                                fileUrl = d.secure_url;
-                            }
-
-                            if (sec === 'schedule') {
-                                await addDoc(collection(db, 'schedules'), { title: item.title, url: fileUrl, createdAt: Date.now() });
-                            } else {
-                                await addDoc(collection(db, 'materials'), { 
-                                    title: item.title, fileUrl: fileUrl, sectionType: sec, 
-                                    year: (sec === 'jobs' || sec === 'activities') ? 'عام' : year, 
-                                    studySystem: finalStudySystem,
-                                    link: sec === 'training' ? link : null, phone: sec === 'jobs' ? phone : null,
-                                    description: sec === 'jobs' ? description : null,
-                                    createdAt: Date.now(), department: 'عام'
-                                });
-                            }
-                        }
-                    } else {
-                        if (!title) { showToast("الرجاء كتابة العنوان أولاً", "error"); setLoading(false); return; }
-                        showToast("جاري النشر...", "info", 0);
-                        await addDoc(collection(db, 'materials'), { 
-                            title: title, fileUrl: null, sectionType: sec, 
-                            year: (sec === 'jobs' || sec === 'activities') ? 'عام' : year, 
-                            studySystem: finalStudySystem,
-                            link: sec === 'training' ? link : null, phone: sec === 'jobs' ? phone : null,
-                            description: sec === 'jobs' ? description : null,
-                            createdAt: Date.now(), department: 'عام'
-                        });
-                    }
-
-                    showToast("تمت الإضافة بنجاح", "success");
-                    setTitle(''); setLink(''); setPhone(''); setDescription(''); setUploadQueue([]); setUploadProgress(0);
-                    document.getElementById('fileInput').value = '';
-                } catch(e) { 
-                    showToast("حدث خطأ أثناء الرفع", "error"); 
-                    console.error(e); 
-                }
-                setLoading(false);
-            };
-
-            const requestDelete = (col, id) => {
-                setConfirmDelete({ col, id });
-            };
-
-            const executeDelete = async () => {
-                if (!confirmDelete) return;
-                try {
-                    await deleteDoc(doc(db, confirmDelete.col, confirmDelete.id));
-                    showToast("تم الحذف بنجاح", "success");
-                } catch (error) {
-                    showToast("حدث خطأ أثناء الحذف", "error");
-                }
-                setConfirmDelete(null);
-            };
-
-            return (
-                <div className="bg-soft-white p-4 md:p-6 rounded-xl shadow-sm space-y-6 relative border border-blue-900/10">
-                    <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                        <div className="flex items-center gap-2">
-                            <button onClick={onBack} className="text-gray-500 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center border border-gray-200">
-                                <i className="fa-solid fa-arrow-right text-xs"></i>
-                            </button>
-                            <h2 className="text-base md:text-lg font-bold text-blue-900">لوحة التحكم</h2>
-                        </div>
-                        <button onClick={()=>{signOut(auth); showToast("تم تسجيل الخروج","success");}} className="text-red-600 text-xs font-bold bg-red-50 px-3 py-1.5 rounded-md border border-red-100">خروج</button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <select className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white font-bold text-gray-700" value={sec} onChange={v=>setSec(v.target.value)}>
-                            <option value="lectures">قسم المحاضرات</option>
-                            <option value="notes">قسم المذكرات</option>
-                            <option value="reviews">قسم المراجعات</option>
-                            <option value="activities">قسم الأنشطة (عام)</option>
-                            <option value="training">قسم التدريب والكورسات</option>
-                            <option value="jobs">قسم الوظائف (عام)</option>
-                            <option value="guide">دليل الطالب</option>
-                            <option value="schedule">جدول محاضرات (سلايدر)</option>
-                        </select>
-
-                        {sec !== 'jobs' && sec !== 'activities' && sec !== 'schedule' && (
-                            <select className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white font-bold text-gray-700" value={year} onChange={v=>setYear(v.target.value)}>
-                                <option>الفرقة الأولى</option>
-                                <option>الفرقة الثانية</option>
-                                <option>الفرقة الثالثة</option>
-                                <option>الفرقة الرابعة</option>
-                                {sec === 'training' && <option>كل الفرق</option>}
-                            </select>
-                        )}
-
-                        {(sec === 'lectures' || sec === 'notes' || sec === 'reviews' || sec === 'guide') && (
-                            <select className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white font-bold text-gray-700 col-span-1 md:col-span-2" value={studySystem} onChange={v=>setStudySystem(v.target.value)}>
-                                <option value="عام">عام (يظهر لطلاب الانتظام والانتساب)</option>
-                                <option value="انتظام">انتظام فقط</option>
-                                <option value="انتساب">انتساب فقط</option>
-                            </select>
-                        )}
-
-                        {sec === 'training' && <input placeholder="رابط خارجي (مثال: يوتيوب)" value={link} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white" onChange={v=>setLink(v.target.value)} />}
-                        {sec === 'jobs' && <input placeholder="رقم الهاتف (للتواصل واتساب/اتصال)" value={phone} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white" onChange={v=>setPhone(v.target.value)} />}
-
-                        {sec === 'jobs' && <textarea placeholder="اكتب تفاصيل ووصف الوظيفة هنا..." value={description} className="border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-900 bg-white col-span-1 md:col-span-2" rows="3" onChange={v=>setDescription(v.target.value)}></textarea>}
-
-                        <div className="flex flex-col col-span-1 md:col-span-2 border-t border-gray-100 pt-3 mt-1">
-                            <label className="text-xs font-bold text-blue-900 mb-2 bg-blue-50 p-1.5 rounded border border-blue-100 inline-block w-fit"><i className="fa-solid fa-cloud-arrow-up ml-1"></i> اختر الملفات (صور، PDF، فيديو حتى 100MB):</label>
-                            <input id="fileInput" type="file" multiple className="border border-gray-200 p-1.5 rounded-lg bg-white cursor-pointer text-xs" onChange={handleFileChange} />
-                        </div>
-
-                        {uploadQueue.length === 0 && (
-                            <input maxLength={70} placeholder="العنوان (اسم الملف أو الوظيفة - أقصى حد 70 حرف)" value={title} className="border border-gray-200 p-2 rounded-lg col-span-1 md:col-span-2 focus:outline-none focus:border-blue-900 bg-white font-bold" onChange={v=>setTitle(v.target.value)} />
-                        )}
-
-                        {uploadQueue.length > 0 && (
-                            <div className="col-span-1 md:col-span-2 bg-blue-50 p-3 rounded-lg border border-blue-100 space-y-2">
-                                <label className="text-xs font-bold text-blue-900">أضف وصفاً لكل ملف محدد (حد أقصى 70 حرف):</label>
-                                {uploadQueue.map((item, idx) => (
-                                    <div key={idx} className="flex flex-col sm:flex-row items-center gap-1.5 bg-white p-1.5 rounded border border-gray-200">
-                                        <span className="text-[10px] text-gray-500 w-full sm:w-1/3 truncate" dir="ltr">{item.file.name}</span>
-                                        <input maxLength={70} className={`border border-gray-200 p-1.5 rounded w-full sm:w-2/3 text-xs focus:outline-none focus:border-blue-900 font-bold bg-gray-50 ${!item.title ? 'border-red-400' : ''}`} value={item.title} placeholder="اكتب العنوان أو الوصف هنا..." onChange={(e) => { const newQ =[...uploadQueue]; newQ[idx].title = e.target.value; setUploadQueue(newQ); }} />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <button onClick={upload} disabled={loading} className="w-full bg-green-600 text-white py-2.5 rounded-lg font-bold shadow-sm flex justify-center items-center gap-2 text-sm">
-                        {loading ? (
-                            <>
-                                <i className="fa-solid fa-circle-notch fa-spin" style={{animation: 'fa-spin 2s infinite linear !important'}}></i>
-                                جاري التنفيذ... {uploadProgress}%
-                            </>
-                        ) : 'إضافة الآن'}
-                    </button>
-
-                    <div className="mt-6 border-t border-gray-200 pt-6">
-                        <h3 className="font-bold mb-3 text-blue-900 text-sm">إدارة الملفات المرفوعة:</h3>
-                        <div className="space-y-1.5 max-h-56 overflow-y-auto sidebar-scroll pr-1">
-                            {materials.map(m => (
-                                <div key={m.id} className="flex justify-between items-center p-2 bg-white border border-gray-200 rounded-lg text-xs">
-                                    <span className="font-bold line-clamp-1">
-                                        {m.title} 
-                                        <span className="text-[10px] text-gray-400 font-normal mr-1">({m.sectionType})</span>
-                                        {m.studySystem && m.studySystem !== 'عام' && <span className="text-[9px] bg-yellow-50 text-yellow-800 px-1.5 rounded mr-1 border border-yellow-200">{m.studySystem}</span>}
-                                    </span>
-                                    <button onClick={()=>requestDelete('materials', m.id)} className="text-red-500 bg-red-50 border border-red-100 w-6 h-6 rounded flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-trash text-[10px]"></i></button>
-                                </div>
-                            ))}
-                            {schedules.map(s => (
-                                <div key={s.id} className="flex justify-between items-center p-2 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
-                                    <span className="font-bold line-clamp-1 text-yellow-900">{s.title} <span className="text-[10px] text-yellow-600 font-normal">(سلايدر)</span></span>
-                                    <button onClick={()=>requestDelete('schedules', s.id)} className="text-red-500 bg-red-50 border border-red-100 w-6 h-6 rounded flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-trash text-[10px]"></i></button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {confirmDelete && (
-                        <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
-                            <div className="bg-soft-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center border border-red-200">
-                                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600 text-2xl border border-red-200">
-                                    <i className="fa-solid fa-triangle-exclamation"></i>
-                                </div>
-                                <h3 className="text-base font-bold text-gray-800 mb-2">تأكيد الحذف</h3>
-                                <p className="text-gray-500 mb-5 text-xs font-bold">هل أنت متأكد من حذف هذا العنصر؟</p>
-                                <div className="flex gap-2">
-                                    <button onClick={executeDelete} className="flex-1 bg-red-600 text-white py-2 rounded-lg text-xs font-bold">تأكيد الحذف</button>
-                                    <button onClick={() => setConfirmDelete(null)} className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg text-xs font-bold">إلغاء</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
 
         const AboutPage = ({ onBack }) => (
             <div className="bg-soft-white p-6 md:p-8 rounded-xl shadow-sm leading-relaxed border border-blue-900/10">
                 <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-3">
-                    <button onClick={onBack} className="text-gray-500 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200">
-                        <i className="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
+                    <button onClick={onBack} className="text-gray-500 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200"><i className="fa-solid fa-arrow-right text-xs"></i></button>
                     <h2 className="text-lg md:text-xl font-bold text-blue-900">من نحن؟</h2>
                 </div>
                 <p className="mb-3 text-sm font-bold text-gray-700">موقع كلية التجارة جامعة الزقازيق هو مبادرة طلابية تهدف إلى توفير كافة المصادر التعليمية من محاضرات ومذكرات بشكل منظم وسهل الوصول.</p>
                 <p className="mb-3 text-sm font-bold text-gray-700">تم بناء هذا الموقع لخدمة أكثر من 30 ألف طالب في الكلية، مع التركيز على تحديث المحتوى يومياً.</p>
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-sm mt-5">
-                    <p className="text-xs font-black text-blue-900 text-center"><i className="fa-solid fa-code mr-1"></i> إشراف وتطوير: شهاب طارق صلاح</p>
-                </div>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-sm mt-5"><p className="text-xs font-black text-blue-900 text-center"><i className="fa-solid fa-code mr-1"></i> إشراف وتطوير: شهاب طارق صلاح</p></div>
                 <h3 className="font-bold mt-6 mb-2 text-red-600 text-sm"><i className="fa-solid fa-shield-halved mr-1"></i> سياسة الخصوصية:</h3>
                 <p className="text-[10px] md:text-xs text-gray-500 font-bold">نحن نحترم حقوق الملكية الفكرية، كافة الملفات المرفوعة هي ملخصات طلابية. إذا كنت تعتقد أن هناك محتوى ينتهك حقوقك يرجى مراسلتنا فوراً.</p>
             </div>
@@ -1351,13 +801,10 @@
                 navigator.serviceWorker.register('service-worker.js')
                     .then(reg => {
                         console.log('SW Registered');
-
-                        // التحقق من وجود تحديثات في الخلفية فور فتح الموقع
                         reg.onupdatefound = () => {
                             const installingWorker = reg.installing;
                             installingWorker.onstatechange = () => {
                                 if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    // هنا تم تحميل كود جديد.. المتصفح سيقوم بالتبديل تلقائياً
                                     console.log('Update found, cleaning cache...');
                                 }
                             };
@@ -1366,8 +813,6 @@
                     .catch(err => console.error('SW Error:', err));
             });
 
-            // سحر السرعة: بمجرد تفعيل النسخة الجديدة من السيرفس وركر
-            // سيقوم الموقع بإعادة تحميل نفسه "مرة واحدة" ليعرض أحدث البيانات فوراً
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
