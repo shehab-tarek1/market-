@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-4229854234305317">
     <title>كلية التجارة جامعة الزقازيق | مساهمة طلابيه </title>
 
@@ -11,8 +11,7 @@
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
 
-    <!-- 🌟 تم تصغير صورة الواجهة إلى 600 بكسل لتناسب الهواتف وتلغي اللاج تماماً -->
-    <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:low,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'">
@@ -37,12 +36,12 @@
 
     <meta property="og:title" content="كلية التجارة جامعة الزقازيق | الموقع التعليمي">
     <meta property="og:description" content="المنصة التعليمية الشاملة لطلاب كلية التجارة جامعة الزقازيق - محاضرات، مذكرات، جداول، وأنشطة طلابية.">
-    <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
+    <meta property="og:image" content="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png">
     <meta property="og:url" content="https://faculty-of-commerce-2026.firebaseapp.com/">
     <meta property="og:type" content="website">
 
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
         button, a, select, input, .optimized-card { touch-action: manipulation; }
         .ad-container:empty { display: none !important; }
         .nav-link-active { border-bottom: 3px solid #fbbf24; color: #fbbf24 !important; }
@@ -52,28 +51,6 @@
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         * { transition: none !important; }
         .bg-soft-white { background-color: #fafbfc; }
-
-        /* حركة القائمة المنسدلة الصغيرة */
-        @keyframes dropDown {
-            from { opacity: 0; transform: translateY(-5px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .animate-drop-down {
-            transform-origin: top;
-            animation: dropDown 0.15s ease-out forwards;
-        }
-
-        /* 🌟 حركة نبض الإطار لتمييز البطاقة المطلوبة (لمدة 3 ثواني) */
-        @keyframes highlightPulse {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); border-color: #3b82f6; }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); border-color: #3b82f6; }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); border-color: transparent; }
-        }
-        .highlight-target {
-            animation: highlightPulse 1s ease-out 3;
-            border: 2px solid #3b82f6 !important;
-            border-radius: 0.75rem;
-        }
     </style>
 </head>
 <body class="pb-20 lg:pb-0 text-gray-800">
@@ -83,7 +60,7 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        // استيراد أدوات القراءة فقط من فايربيز
+        // استيراد أدوات القراءة فقط من فايربيز (تم مسح أدوات الإدارة وتسجيل الدخول بالكامل)
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
@@ -111,15 +88,13 @@
             return url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes('/video/upload/');
         };
 
-        // 🌟 تصغير أحجام الصور لتسريع الموقع للهواتف الضعيفة بشكل صاروخي
         const getThumbnail = (url, type = 'default') => {
             if (!url) return '';
             if (url.includes('cloudinary.com')) {
-                let transform = '/upload/w_100,h_100,c_fill,q_auto:low,f_auto/'; // للأنشطة
-                if (type === 'a4') transform = '/upload/w_80,h_112,c_fill,q_auto:low,f_auto/'; // للمذكرات والمحاضرات
-                if (type === 'slider') transform = '/upload/w_250,h_150,c_fit,q_auto:low,f_auto/'; // 🌟 تصغير السلايدر الخارجي جداً
-                if (type === 'preview') transform = '/upload/w_500,c_limit,q_auto:eco,f_auto/'; // 🌟 تصغير الصورة عند فتحها للقراءة (بدل الأصلية المليئة باللاج)
-
+                let transform = '/upload/w_300,h_300,c_fill,q_auto:eco,f_auto/';
+                if (type === 'a4') transform = '/upload/w_200,h_280,c_fill,q_auto:eco,f_auto/';
+                if (type === 'slider') transform = '/upload/w_800,h_400,c_fit,q_auto:eco,f_auto/';
+                
                 if (url.toLowerCase().endsWith('.pdf')) return url.replace('/upload/', transform).replace(/\.pdf$/i, '.jpg');
                 if (isVideoUrl(url)) return url.replace('/upload/', transform).replace(/\.(mp4|webm|ogg|mov)$/i, '.jpg');
                 return url.replace('/upload/', transform);
@@ -140,45 +115,6 @@
             );
         });
 
-        // 🌟 القائمة المنسدلة الصغيرة والأنيقة لحل مشكلة القص
-        const CustomMobileFilter = React.memo(({ value, options, onChange, align = "right" }) => {
-            const[isOpen, setIsOpen] = useState(false);
-            const alignClass = align === "left" ? "left-0" : "right-0"; 
-
-            return (
-                <div className="relative">
-                    <button 
-                        onClick={() => setIsOpen(!isOpen)} 
-                        className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800 flex items-center justify-between min-w-[70px]"
-                    >
-                        <span>{value}</span>
-                        <i className={`fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
-                    </button>
-
-                    {isOpen && (
-                        <>
-                            <div className="fixed inset-0 z-[99998]" onClick={() => setIsOpen(false)}></div>
-                            <div className={`absolute ${alignClass} top-full mt-1.5 w-36 bg-white rounded-lg shadow-xl border border-gray-100 z-[99999] animate-drop-down overflow-hidden`}>
-                                <div className="flex flex-col py-1 max-h-56 overflow-y-auto sidebar-scroll">
-                                    {options.map(opt => (
-                                        <button 
-                                            key={opt} 
-                                            onClick={() => { onChange(opt); setIsOpen(false); }}
-                                            className={`flex items-center justify-between w-full px-3 py-2.5 text-[10px] font-bold transition-colors ${value === opt ? 'bg-blue-50 text-blue-900' : 'text-gray-600 hover:bg-gray-50'}`}
-                                        >
-                                            <span className="truncate">{opt}</span>
-                                            {value === opt && <i className="fa-solid fa-check text-[9px]"></i>}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            );
-        });
-
-        // 🌟 نافذة المعاينة (تم تحديثها لتستخدم صور مضغوطة بدلاً من الأصلية)
         const PreviewModal = React.memo(({ previewData, onClose, onNavigate }) => {
             const[isMediaLoading, setIsMediaLoading] = useState(true);
 
@@ -191,13 +127,10 @@
             if (previewData.items.length === 0) return null;
             const currentItem = previewData.items[previewData.index];
             if (!currentItem || !currentItem.url) return null;
-
+            
             const isPdf = currentItem.url.toLowerCase().includes('.pdf');
             const isVid = isVideoUrl(currentItem.url);
             const pdfViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(currentItem.url)}&embedded=true`;
-
-            // 🌟 ضغط الصورة المعروضة في النافذة لتسريع الفتح
-            const displayUrl = (!isPdf && !isVid) ? getThumbnail(currentItem.url, 'preview') : currentItem.url;
 
             return (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-2 md:p-10">
@@ -211,8 +144,8 @@
                         )}
                         {isPdf ? <iframe onLoad={() => setIsMediaLoading(false)} src={pdfViewerUrl} className="w-full h-full border-0 bg-white relative z-30" title="PDF Preview"></iframe>
                         : isVid ? <video onLoadedData={() => setIsMediaLoading(false)} src={currentItem.url} controls autoPlay className="max-w-full max-h-full outline-none relative z-30" playsInline></video>
-                        : <img onLoad={() => setIsMediaLoading(false)} src={displayUrl} alt="Preview" className="max-w-full max-h-full object-contain relative z-30" decoding="async" />}
-
+                        : <img onLoad={() => setIsMediaLoading(false)} src={currentItem.url} alt="Preview" className="max-w-full max-h-full object-contain relative z-30" decoding="async" />}
+                        
                         {previewData.items.length > 1 && (
                             <>
                                 <button onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50"><i className="fa-solid fa-chevron-left text-lg md:text-xl"></i></button>
@@ -273,12 +206,10 @@
                 return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
             };
 
-            // 🌟 روابط مشاركة قصيرة ونظيفة بدون index.html
             const handleShareCard = async (e, item) => {
                 e.stopPropagation();
                 try {
-                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
-                    const url = new URL(basePath);
+                    const url = new URL(window.location.href);
                     url.searchParams.set('p', type);
                     url.searchParams.set('i', toNumericId(item.id));
                     if (navigator.share) await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
@@ -290,7 +221,7 @@
 
             return (
                 <div className="bg-soft-white p-3 md:p-4 rounded-xl shadow-sm border border-blue-900/10">
-                    <div className="flex flex-wrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-2 relative z-40">
+                    <div className="flex flex-nowrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-1.5 overflow-x-auto hide-scrollbar">
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                             <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-arrow-right text-[10px]"></i></button>
                             <div className="text-blue-900 text-xs hidden sm:block"><i className={`fa-solid ${icon}`}></i></div>
@@ -300,20 +231,20 @@
                             {(!hideYearFilter || showSystemFilter) && (
                                 <>
                                     {!hideYearFilter && (
-                                        <CustomMobileFilter 
-                                            value={filterYear} 
-                                            options={years} 
-                                            align="right"
-                                            onChange={(val) => {setFilterYear(val); setVisibleCount(6);}} 
-                                        />
+                                        <div className="relative">
+                                            <select value={filterYear} onChange={(e) => {setFilterYear(e.target.value); setVisibleCount(6);}} className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800">
+                                                {years.map(y => <option key={y} value={y}>{y}</option>)}
+                                            </select>
+                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                        </div>
                                     )}
                                     {showSystemFilter && (
-                                        <CustomMobileFilter 
-                                            value={filterSystem} 
-                                            options={systems} 
-                                            align="left" 
-                                            onChange={(val) => {setFilterSystem(val); setVisibleCount(6);}} 
-                                        />
+                                        <div className="relative">
+                                            <select value={filterSystem} onChange={(e) => {setFilterSystem(e.target.value); setVisibleCount(6);}} className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800">
+                                                {systems.map(s => <option key={s} value={s}>{s}</option>)}
+                                            </select>
+                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                        </div>
                                     )}
                                 </>
                             )}
@@ -334,7 +265,7 @@
                                 );
                             }
                             return (
-                                <div key={item.id} id={`card-${numericId}`} className="optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden transition-all">
+                                <div key={item.id} id={`card-${numericId}`} className="optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden">
                                     <div className={`relative flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer flex items-center justify-center ${isA4Card ? 'w-20 h-28 sm:w-full sm:h-48' : 'w-24 h-24 sm:w-full sm:h-40'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
                                         <img src={getThumbnail(item.fileUrl, thumbType)} alt={item.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                                         {item.fileUrl?.endsWith('.pdf') && <div className="absolute bottom-1 right-1 bg-red-600 text-white text-[9px] px-1.5 rounded font-bold shadow z-10">PDF</div>}
@@ -411,6 +342,32 @@
                 </div>
             );
         });
+
+        const SidebarBtn = React.memo(({ icon, label, active, onClick, color="text-gray-700" }) => (
+            <button onClick={onClick} className={`flex items-center gap-2 w-full p-2.5 rounded-lg font-bold text-[11px] md:text-xs border-r-4 ${active ? 'bg-blue-50 text-blue-900 border-blue-900' : `border-transparent ${color}`}`}>
+                <div className="w-5 flex justify-center"><i className={`fa-solid ${icon} text-sm md:text-base`}></i></div><span className="text-right flex-1">{label}</span>
+            </button>
+        ));
+
+        const HomeCard = React.memo(({ icon, label, color, onClick }) => (
+            <div onClick={onClick} className={`${color} p-3 md:p-4 rounded-xl text-white flex flex-col items-center justify-center gap-1.5 shadow-sm cursor-pointer border border-white/20`}>
+                <i className={`fa-solid ${icon} text-xl md:text-2xl`}></i><span className="font-bold text-[10px] md:text-xs">{label}</span>
+            </div>
+        ));
+
+        const AboutPage = ({ onBack }) => (
+            <div className="bg-soft-white p-6 md:p-8 rounded-xl shadow-sm leading-relaxed border border-blue-900/10">
+                <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-3">
+                    <button onClick={onBack} className="text-gray-500 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200"><i className="fa-solid fa-arrow-right text-xs"></i></button>
+                    <h2 className="text-lg md:text-xl font-bold text-blue-900">من نحن؟</h2>
+                </div>
+                <p className="mb-3 text-sm font-bold text-gray-700">موقع كلية التجارة جامعة الزقازيق هو مبادرة طلابية تهدف إلى توفير كافة المصادر التعليمية من محاضرات ومذكرات بشكل منظم وسهل الوصول.</p>
+                <p className="mb-3 text-sm font-bold text-gray-700">تم بناء هذا الموقع لخدمة أكثر من 30 ألف طالب في الكلية، مع التركيز على تحديث المحتوى يومياً.</p>
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-sm mt-5"><p className="text-xs font-black text-blue-900 text-center"><i className="fa-solid fa-code mr-1"></i> إشراف وتطوير: شهاب طارق صلاح</p></div>
+                <h3 className="font-bold mt-6 mb-2 text-red-600 text-sm"><i className="fa-solid fa-shield-halved mr-1"></i> سياسة الخصوصية:</h3>
+                <p className="text-[10px] md:text-xs text-gray-500 font-bold">نحن نحترم حقوق الملكية الفكرية، كافة الملفات المرفوعة هي ملخصات طلابية. إذا كنت تعتقد أن هناك محتوى ينتهك حقوقك يرجى مراسلتنا فوراً.</p>
+            </div>
+        );
 
         const InternalBrowser = React.memo(({ isOpen, onClose, url, title }) => {
             const[iframeLoading, setIframeLoading] = useState(true);
@@ -515,48 +472,26 @@
                 }
             };
 
-            // 🌟 إزالة اللاج (Lag) باستخدام startTransition وتأخير زمني بسيط لتفريغ المعالج
             const navigate = useCallback((pg) => {
                 try {
                     setIsMobileMenuOpen(false); setHighlightedItemId(null);
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    
-                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
-                    const url = new URL(basePath);
-                    if (pg !== 'home') url.searchParams.set('p', pg);
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('p', pg); url.searchParams.delete('i'); url.searchParams.delete('page'); url.searchParams.delete('item');
                     window.history.pushState({ page: pg }, '', url.toString());
-                    
-                    // منع تجميد المتصفح أثناء التبديل بين الأقسام
-                    setTimeout(() => {
-                        React.startTransition(() => {
-                            setPage(pg);
-                        });
-                        setTimeout(() => { 
-                            const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; 
-                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
-                        }, 10);
-                    }, 5);
-
+                    setPage(pg);
+                    setTimeout(() => { const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; window.scrollTo({ top: topPos, behavior: 'instant' }); }, 0);
                 } catch (err) { setPage(pg); window.scrollTo(0, 0); }
             },[]);
 
             const goBack = useCallback(() => {
                 try {
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
-                    const url = new URL(basePath);
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('p'); url.searchParams.delete('i'); url.searchParams.delete('page'); url.searchParams.delete('item');
                     window.history.pushState({ page: 'home' }, '', url.toString());
-                    
-                    setTimeout(() => {
-                        React.startTransition(() => {
-                            setPage('home');
-                        });
-                        setTimeout(() => { 
-                            const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0; 
-                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
-                        }, 10);
-                    }, 5);
-
+                    setPage('home');
+                    setTimeout(() => { const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0; window.scrollTo({ top: topPos, behavior: 'instant' }); }, 0);
                 } catch (err) { navigate('home'); }
             }, [navigate]);
 
@@ -581,31 +516,12 @@
                     if (pageParam) {
                         setPage(pageParam);
                         setInitialFilters({ year: resolveYear(params.get('y') || params.get('year')), system: resolveSystem(params.get('s') || params.get('system')) });
-                        
-                        // 🌟 النزول لبطاقة محددة وعمل Highlight وميض أزرق
                         if(itemParam) {
                             setHighlightedItemId(itemParam);
-                            setTimeout(() => { 
-                                const el = document.getElementById(`card-${itemParam}`); 
-                                if(el) { 
-                                    const y = el.getBoundingClientRect().top + window.scrollY - 100; 
-                                    window.scrollTo({ top: y, behavior: 'smooth' }); 
-                                    
-                                    el.classList.add('highlight-target');
-                                    setTimeout(() => el.classList.remove('highlight-target'), 3000);
-                                } 
-                            }, 800);
+                            setTimeout(() => { const el = document.getElementById(`card-${itemParam}`); if(el) { const y = el.getBoundingClientRect().top + window.scrollY - 100; window.scrollTo({ top: y, behavior: 'smooth' }); } }, 800);
                         }
-                        
-                        let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
-                        const url = new URL(basePath);
-                        url.searchParams.set('p', pageParam);
-                        if(itemParam) url.searchParams.set('i', itemParam);
-                        window.history.replaceState({ page: pageParam }, document.title, url.toString());
-                    } else { 
-                        let basePath = window.location.href.split('?')[0].replace(/index\.html$/, '');
-                        window.history.replaceState({ page: 'home' }, document.title, basePath); 
-                    }
+                        window.history.replaceState({ page: pageParam }, document.title, window.location.href);
+                    } else { window.history.replaceState({ page: 'home' }, document.title, window.location.href); }
                 } catch (err) { console.error("Init Error:", err); }
 
                 const qMat = query(collection(db, 'materials'), orderBy('createdAt', 'desc'), limit(150));
@@ -621,15 +537,8 @@
                         const params = new URLSearchParams(window.location.search);
                         const pg = params.get('p') || params.get('page') || 'home';
                         if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                        
-                        React.startTransition(() => {
-                            setPage(pg);
-                        });
-                        
-                        setTimeout(() => { 
-                            const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; 
-                            window.scrollTo({ top: topPos, behavior: 'instant' }); 
-                        }, 10);
+                        setPage(pg);
+                        setTimeout(() => { const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; window.scrollTo({ top: topPos, behavior: 'instant' }); }, 0);
                     } catch (err) {}
                 };
                 window.addEventListener('popstate', handlePopState);
@@ -695,7 +604,6 @@
                             <SidebarBtn icon="fa-map-location" label="دليل الطالب" active={page==='guide'} onClick={() => navigate('guide')} />
                             <SidebarBtn icon="fa-circle-info" label="من نحن" active={page==='about'} onClick={() => navigate('about')} />
                             <hr className="my-1 border-gray-200 w-full" />
-                            <button onClick={() => window.location.href = 'admin.html'} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 shadow-sm mt-1 border border-yellow-600"><i className="fa-solid fa-user-shield"></i> الإدارة المحمية</button>
                             <button onClick={handleCleanSite} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-sm mt-1 border border-teal-600"><i className="fa-solid fa-broom"></i> تنظيف الموقع</button>
                         </div>
                     </div>
@@ -705,7 +613,7 @@
                         {page === 'home' && (
                             <div className="space-y-6 md:space-y-8">
                                 <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-56 shadow-lg">
-                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_600,h_300,q_auto:low,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
+                                    <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-950/85 via-blue-900/45 to-transparent flex flex-col justify-center items-center text-center px-6 md:px-8 text-white">
                                         <h2 className="text-2xl md:text-3xl font-black mb-1 md:mb-2 drop-shadow-lg">بوابة كلية التجارة</h2>
                                         <p className="opacity-90 font-bold text-xs md:text-sm drop-shadow-md">جامعة الزقازيق - شهاب طارق صلاح</p>
@@ -765,62 +673,8 @@
             );
         };
 
-        const SidebarBtn = React.memo(({ icon, label, active, onClick, color="text-gray-700" }) => (
-            <button onClick={onClick} className={`flex items-center gap-2 w-full p-2.5 rounded-lg font-bold text-[11px] md:text-xs border-r-4 ${active ? 'bg-blue-50 text-blue-900 border-blue-900' : `border-transparent ${color}`}`}>
-                <div className="w-5 flex justify-center"><i className={`fa-solid ${icon} text-sm md:text-base`}></i></div><span className="text-right flex-1">{label}</span>
-            </button>
-        ));
-
-        const HomeCard = React.memo(({ icon, label, color, onClick }) => (
-            <div onClick={onClick} className={`${color} p-3 md:p-4 rounded-xl text-white flex flex-col items-center justify-center gap-1.5 shadow-sm cursor-pointer border border-white/20`}>
-                <i className={`fa-solid ${icon} text-xl md:text-2xl`}></i><span className="font-bold text-[10px] md:text-xs">{label}</span>
-            </div>
-        ));
-
-        const AboutPage = ({ onBack }) => (
-            <div className="bg-soft-white p-6 md:p-8 rounded-xl shadow-sm leading-relaxed border border-blue-900/10">
-                <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-3">
-                    <button onClick={onBack} className="text-gray-500 bg-gray-100 w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 border border-gray-200"><i className="fa-solid fa-arrow-right text-xs"></i></button>
-                    <h2 className="text-lg md:text-xl font-bold text-blue-900">من نحن؟</h2>
-                </div>
-                <p className="mb-3 text-sm font-bold text-gray-700">موقع كلية التجارة جامعة الزقازيق هو مبادرة طلابية تهدف إلى توفير كافة المصادر التعليمية من محاضرات ومذكرات بشكل منظم وسهل الوصول.</p>
-                <p className="mb-3 text-sm font-bold text-gray-700">تم بناء هذا الموقع لخدمة أكثر من 30 ألف طالب في الكلية، مع التركيز على تحديث المحتوى يومياً.</p>
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-sm mt-5"><p className="text-xs font-black text-blue-900 text-center"><i className="fa-solid fa-code mr-1"></i> إشراف وتطوير: شهاب طارق صلاح</p></div>
-                <h3 className="font-bold mt-6 mb-2 text-red-600 text-sm"><i className="fa-solid fa-shield-halved mr-1"></i> سياسة الخصوصية:</h3>
-                <p className="text-[10px] md:text-xs text-gray-500 font-bold">نحن نحترم حقوق الملكية الفكرية، كافة الملفات المرفوعة هي ملخصات طلابية. إذا كنت تعتقد أن هناك محتوى ينتهك حقوقك يرجى مراسلتنا فوراً.</p>
-            </div>
-        );
-
         const root = createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-
-   <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => {
-                        console.log('SW Registered');
-                        reg.onupdatefound = () => {
-                            const installingWorker = reg.installing;
-                            installingWorker.onstatechange = () => {
-                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    console.log('Update found, cleaning cache...');
-                                }
-                            };
-                        };
-                    })
-                    .catch(err => console.error('SW Error:', err));
-            });
-
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    window.location.reload();
-                    refreshing = true;
-                }
-            });
-        }
     </script>
 </body>
 </html>
