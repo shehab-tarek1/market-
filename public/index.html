@@ -6,17 +6,19 @@
     <meta name="google-adsense-account" content="ca-pub-4229854234305317">
     <title>كلية التجارة جامعة الزقازيق | مساهمة طلابيه </title>
 
-    <!-- تسريع الاتصال بسيرفرات الصور وقواعد البيانات -->
+   <!-- تجهيز الاتصال للسيرفرات (Cloudinary للأهمية القصوى و Firebase للخلفية) -->
     <link rel="preconnect" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://firestore.googleapis.com">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
 
-    <!-- التحميل المسبق للأيقونات والخطوط لضمان ظهورها فوراً -->
+<!-- تحميل أول صورة في السلايدر بأولوية قصوى قبل معالجة الكود -->
+    <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
+
+ <!-- تحميل الأيقونات والخطوط بنظام لا يعطل واجهة الموقع -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" as="style">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'">
 
     <!-- إعدادات PWA -->
     <link rel="manifest" href="manifest.json">
@@ -1343,16 +1345,35 @@
         root.render(<App />);
     </script>
 
-    <script>
+   <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registered successfully');
+                    .then(reg => {
+                        console.log('SW Registered');
+
+                        // التحقق من وجود تحديثات في الخلفية فور فتح الموقع
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // هنا تم تحميل كود جديد.. المتصفح سيقوم بالتبديل تلقائياً
+                                    console.log('Update found, cleaning cache...');
+                                }
+                            };
+                        };
                     })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+                    .catch(err => console.error('SW Error:', err));
+            });
+
+            // سحر السرعة: بمجرد تفعيل النسخة الجديدة من السيرفس وركر
+            // سيقوم الموقع بإعادة تحميل نفسه "مرة واحدة" ليعرض أحدث البيانات فوراً
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    window.location.reload();
+                    refreshing = true;
+                }
             });
         }
     </script>
