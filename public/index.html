@@ -64,11 +64,6 @@
             transition: none !important;
         }
 
-        .optimized-card {
-            content-visibility: auto;
-            contain-intrinsic-size: 150px;
-        }
-
         .bg-soft-white { background-color: #fafbfc; }
     </style>
 </head>
@@ -83,6 +78,17 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
         
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // دالة تحويل الرموز الإنجليزية إلى أرقام للروابط
+        const toNumericId = (str) => {
+            if (!str) return '';
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; 
+            }
+            return Math.abs(hash).toString();
+        };
 
         const firebaseConfig = {
             apiKey: "AIzaSyANg4wLchZaikXneXr1c3qhRgcOnvPbfoA",
@@ -141,7 +147,7 @@
         });
 
         const PreviewModal = React.memo(({ previewData, onClose, onNavigate }) => {
-            const [isMediaLoading, setIsMediaLoading] = useState(true);
+            const[isMediaLoading, setIsMediaLoading] = useState(true);
 
             useEffect(() => {
                 if (previewData.items.length > 0) {
@@ -212,12 +218,6 @@
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'اختار الفرقة');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'اختار النظام'); 
             const[visibleCount, setVisibleCount] = useState(6);
-            const[loadImages, setLoadImages] = useState(false);
-
-            useEffect(() => {
-                const timer = setTimeout(() => setLoadImages(true), 50);
-                return () => clearTimeout(timer);
-            },[]);
 
             const years = type === 'training' 
                 ?['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة', 'كل الفرق'] 
@@ -236,7 +236,7 @@
 
             useEffect(() => {
                 if(highlightedItemId) {
-                    const itemIndex = filtered.findIndex(i => i.id === highlightedItemId);
+                    const itemIndex = filtered.findIndex(i => toNumericId(i.id) === highlightedItemId);
                     if(itemIndex >= visibleCount) {
                         setVisibleCount(itemIndex + 12);
                     }
@@ -267,7 +267,7 @@
                 try {
                     const url = new URL(window.location.href);
                     url.searchParams.set('p', type);
-                    url.searchParams.set('i', item.id);
+                    url.searchParams.set('i', toNumericId(item.id)); // استخدام الرقم بدلاً من الرمز الإنجليزي
                     if (navigator.share) {
                         await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
                     } else {
@@ -337,10 +337,11 @@
                         ) : (
                             visibleData.map(item => {
                                 const isVid = isVideoUrl(item.fileUrl);
+                                const numericId = toNumericId(item.id);
 
                                 if (isActivities) {
                                     return (
-                                        <div key={item.id} id={`card-${item.id}`} className={`optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group`} onClick={() => onPreviewSingle(item.fileUrl)}>
+                                        <div key={item.id} id={`card-${numericId}`} className={`optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group`} onClick={() => onPreviewSingle(item.fileUrl)}>
                                             {isVid && (
                                                 <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none">
                                                     <div className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center text-white border-2 border-white/50">
@@ -354,7 +355,7 @@
                                             </button>
 
                                             <img 
-                                                src={loadImages ? getThumbnail(item.fileUrl, 'default') : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='} 
+                                                src={getThumbnail(item.fileUrl, 'default')} 
                                                 alt={item.title} 
                                                 loading="lazy" 
                                                 decoding="async"
@@ -369,12 +370,12 @@
                                 }
 
                                 return (
-                                    <div key={item.id} id={`card-${item.id}`} className={`optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden`}>
+                                    <div key={item.id} id={`card-${numericId}`} className={`optimized-card flex flex-row sm:flex-col gap-3 p-2.5 border border-blue-900/10 rounded-xl bg-white relative overflow-hidden`}>
 
                                         <div className={`relative flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 cursor-pointer flex items-center justify-center ${isA4Card ? 'w-20 h-28 sm:w-full sm:h-48' : 'w-24 h-24 sm:w-full sm:h-40'}`} onClick={() => onPreviewSingle(item.fileUrl)}>
                                             
                                             <img 
-                                                src={loadImages ? getThumbnail(item.fileUrl, thumbType) : 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='} 
+                                                src={getThumbnail(item.fileUrl, thumbType)} 
                                                 alt={item.title} 
                                                 loading="lazy" 
                                                 decoding="async"
@@ -649,19 +650,42 @@
                     // استعادة مكان النزول للصفحة الجديدة أو الصعود للأعلى
                     setTimeout(() => {
                         const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0;
-                        window.scrollTo({ top: topPos, behavior: 'auto' });
-                    }, 10);
+                        window.scrollTo({ top: topPos, behavior: 'instant' });
+                    }, 0);
                 } catch (err) {
                     console.error("Navigation Error:", err);
-                    // في حالة حدوث أي خطأ في المتصفح، يتم الانتقال بأمان
                     setPage(pg);
                     window.scrollTo(0, 0);
                 }
             },[]);
 
-            // دالة الرجوع المضمونة للأقسام (تعود للرئيسية دائماً)
+            // دالة الرجوع المضمونة للأقسام (تعود للرئيسية دائماً وفي نفس المكان)
             const goBack = useCallback(() => {
-                navigate('home');
+                try {
+                    // حفظ مكان النزول للقسم الحالي
+                    if (currentPageRef.current) {
+                        scrollPositions.current[currentPageRef.current] = window.scrollY;
+                    }
+
+                    // تحديث الرابط ليكون الرئيسية
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('p');
+                    url.searchParams.delete('i');
+                    url.searchParams.delete('page');
+                    url.searchParams.delete('item');
+                    window.history.pushState({ page: 'home' }, '', url.toString());
+
+                    setPage('home');
+
+                    // استعادة مكان النزول للصفحة الرئيسية
+                    setTimeout(() => {
+                        const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0;
+                        window.scrollTo({ top: topPos, behavior: 'instant' });
+                    }, 0);
+
+                } catch (err) {
+                    navigate('home');
+                }
             }, [navigate]);
 
             // التأثير الأساسي (يعمل مرة واحدة فقط عند فتح الموقع)
@@ -755,8 +779,8 @@
                         
                         setTimeout(() => {
                             const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0;
-                            window.scrollTo({ top: topPos, behavior: 'auto' });
-                        }, 10);
+                            window.scrollTo({ top: topPos, behavior: 'instant' });
+                        }, 0);
                     } catch (err) {
                         console.error("PopState Error:", err);
                     }
