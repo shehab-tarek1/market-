@@ -14,7 +14,8 @@
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" media="print" onload="this.media='all'">
+    
+    <!-- تم إزالة رابط خطوط جوجل من هنا وسيتم قراءتها من الملفات المحلية -->
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -41,6 +42,31 @@
     <meta property="og:type" content="website">
 
     <style>
+        /* تعريف خط كايرو محلياً لزيادة السرعة */
+        @font-face {
+            font-family: 'Cairo';
+            font-style: normal;
+            font-weight: 400;
+            src: local('Cairo'), url('./assets/fonts/cairo-regular.woff2') format('woff2');
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            font-style: normal;
+            font-weight: 700;
+            src: local('Cairo'), url('./assets/fonts/cairo-bold.woff2') format('woff2');
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Cairo';
+            font-style: normal;
+            font-weight: 900;
+            src: local('Cairo'), url('./assets/fonts/cairo-black.woff2') format('woff2');
+            font-display: swap;
+        }
+
         body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
         button, a, select, input, .optimized-card { touch-action: manipulation; }
         .ad-container:empty { display: none !important; }
@@ -49,8 +75,27 @@
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        * { transition: none !important; }
+        /* إلغاء الانتقال العام لتشغيل الأنيميشن بشكل صحيح */
+        * { transition: background-color 0.2s, color 0.2s, border-color 0.2s; } 
         .bg-soft-white { background-color: #fafbfc; }
+        
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 4px #facc15; transform: scale(1.02); border-color: #facc15; }
+            10% { box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.8); }
+            80% { box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.4); transform: scale(1.01); }
+            100% { box-shadow: 0 0 0 0px rgba(250, 204, 21, 0); transform: scale(1); border-color: #e5e7eb; }
+        }
+        .card-highlight {
+            animation: highlightPulse 3s ease-out forwards !important;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* أنيميشن القائمة المنسدلة */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="pb-20 lg:pb-0 text-gray-800">
@@ -60,15 +105,20 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        // استيراد أدوات القراءة فقط من فايربيز (تم مسح أدوات الإدارة وتسجيل الدخول بالكامل)
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
 
+        // دالة إنشاء معرف مكون من 4 أرقام يبدأ بـ 1
         const toNumericId = (str) => {
             if (!str) return '';
             let hash = 0;
             for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
-            return Math.abs(hash).toString();
+            return String(1000 + (Math.abs(hash) % 9000));
+        };
+
+        const getCleanBaseUrl = () => {
+            let url = window.location.origin + window.location.pathname;
+            return url.replace(/\/index\.html$/, '/');
         };
 
         const firebaseConfig = {
@@ -164,10 +214,34 @@
             return <div ref={adRef} className={`ad-container w-full ${hasAd ? 'my-6 py-4 bg-gray-50 border' : 'h-0 overflow-hidden'}`}></div>;
         });
 
+        // ==========================
+        // تعديلات SectionView
+        // ==========================
         const SectionView = React.memo(({ type, title, icon, data, hideYearFilter = false, showSystemFilter = false, onBack, onPreviewSingle, onRequestDownload, initialFilters, showToast, highlightedItemId }) => {
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'اختار الفرقة');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'اختار النظام'); 
             const[visibleCount, setVisibleCount] = useState(6);
+            
+            // حالة للتحكم في فتح وإغلاق القوائم المنسدلة المخصصة
+            const[openDropdown, setOpenDropdown] = useState(null);
+            const dropdownRef = useRef(null);
+
+            // إغلاق القائمة المنسدلة عند الضغط في أي مكان خارجها
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                        setOpenDropdown(null);
+                    }
+                };
+                document.addEventListener("mousedown", handleClickOutside);
+                return () => document.removeEventListener("mousedown", handleClickOutside);
+            },[]);
+
+            // استجابة لتغير الفلاتر من الخارج 
+            useEffect(() => {
+                if(initialFilters?.year) setFilterYear(initialFilters.year);
+                if(initialFilters?.system) setFilterSystem(initialFilters.system);
+            }, [initialFilters]);
 
             const years = type === 'training' ?['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة', 'كل الفرق'] :['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة'];
             const systems =['اختار النظام', 'انتظام', 'انتساب'];
@@ -209,11 +283,27 @@
             const handleShareCard = async (e, item) => {
                 e.stopPropagation();
                 try {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('p', type);
-                    url.searchParams.set('i', toNumericId(item.id));
-                    if (navigator.share) await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: url.toString() });
-                    else { await navigator.clipboard.writeText(url.toString()); showToast("تم نسخ رابط الملف", "success"); }
+                    const baseUrl = getCleanBaseUrl();
+                    const shareUrl = `${baseUrl}?p=${type}&i=${toNumericId(item.id)}`;
+                    
+                    if (navigator.share) await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: shareUrl });
+                    else { await navigator.clipboard.writeText(shareUrl); showToast("تم نسخ رابط الملف المصغر", "success"); }
+                } catch (err) { console.error(err); }
+            };
+
+            const handleShareSection = async (e) => {
+                e.stopPropagation();
+                try {
+                    const baseUrl = getCleanBaseUrl();
+                    const params = new URLSearchParams();
+                    params.set('p', type);
+                    if (!hideYearFilter && filterYear !== 'اختار الفرقة') params.set('y', filterYear);
+                    if (showSystemFilter && filterSystem !== 'اختار النظام') params.set('s', filterSystem);
+                    
+                    const shareUrl = `${baseUrl}?${params.toString()}`;
+                    
+                    if (navigator.share) await navigator.share({ title: title, text: `تصفح ${title} - كلية التجارة`, url: shareUrl });
+                    else { await navigator.clipboard.writeText(shareUrl); showToast("تم نسخ رابط القسم بالفلاتر", "success"); }
                 } catch (err) { console.error(err); }
             };
 
@@ -221,39 +311,83 @@
 
             return (
                 <div className="bg-soft-white p-3 md:p-4 rounded-xl shadow-sm border border-blue-900/10">
-                    <div className="flex flex-nowrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-1.5 overflow-x-auto hide-scrollbar">
+                    <div className="flex flex-nowrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-1.5 overflow-x-visible hide-scrollbar relative">
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                             <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-arrow-right text-[10px]"></i></button>
                             <div className="text-blue-900 text-xs hidden sm:block"><i className={`fa-solid ${icon}`}></i></div>
                             <h2 className="text-xs md:text-sm font-black text-gray-800 whitespace-nowrap">{title}</h2>
                         </div>
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                        
+                        {/* أزرار الفلترة المخصصة والمشاركة */}
+                        <div className="flex items-center gap-1.5 flex-shrink-0" ref={dropdownRef}>
+                            <button onClick={handleShareSection} className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-200 w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm transition-colors" title="مشاركة القسم">
+                                <i className="fa-solid fa-share-nodes text-[10px] md:text-xs"></i>
+                            </button>
+                            
                             {(!hideYearFilter || showSystemFilter) && (
                                 <>
                                     {!hideYearFilter && (
                                         <div className="relative">
-                                            <select value={filterYear} onChange={(e) => {setFilterYear(e.target.value); setVisibleCount(6);}} className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800">
-                                                {years.map(y => <option key={y} value={y}>{y}</option>)}
-                                            </select>
-                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                            <button 
+                                                onClick={() => setOpenDropdown(openDropdown === 'year' ? null : 'year')}
+                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 transition-colors hover:bg-blue-800"
+                                            >
+                                                {filterYear}
+                                                <i className={`fa-solid fa-chevron-down text-[8px] transition-transform duration-200 ${openDropdown === 'year' ? 'rotate-180' : ''}`}></i>
+                                            </button>
+                                            
+                                            {/* القائمة المنسدلة للفرقة */}
+                                            {openDropdown === 'year' && (
+                                                <div className="absolute top-full mt-1 right-0 w-32 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animate-[fadeIn_0.2s_ease-out]" style={{animation: 'fadeIn 0.2s ease-out'}}>
+                                                    {years.map(y => (
+                                                        <div 
+                                                            key={y} 
+                                                            onClick={() => { setFilterYear(y); setVisibleCount(6); setOpenDropdown(null); }} 
+                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${filterYear === y ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            {y}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     {showSystemFilter && (
                                         <div className="relative">
-                                            <select value={filterSystem} onChange={(e) => {setFilterSystem(e.target.value); setVisibleCount(6);}} className="appearance-none bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md pl-5 pr-2 py-1 outline-none cursor-pointer shadow-sm border border-blue-800">
-                                                {systems.map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
-                                            <i className="fa-solid fa-chevron-down absolute left-1.5 top-1/2 -translate-y-1/2 text-white text-[8px] pointer-events-none"></i>
+                                            <button 
+                                                onClick={() => setOpenDropdown(openDropdown === 'system' ? null : 'system')}
+                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 transition-colors hover:bg-blue-800"
+                                            >
+                                                {filterSystem}
+                                                <i className={`fa-solid fa-chevron-down text-[8px] transition-transform duration-200 ${openDropdown === 'system' ? 'rotate-180' : ''}`}></i>
+                                            </button>
+                                            
+                                            {/* القائمة المنسدلة للنظام */}
+                                            {openDropdown === 'system' && (
+                                                <div className="absolute top-full mt-1 left-0 right-auto md:right-0 md:left-auto w-28 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animate-[fadeIn_0.2s_ease-out]" style={{animation: 'fadeIn 0.2s ease-out'}}>
+                                                    {systems.map(s => (
+                                                        <div 
+                                                            key={s} 
+                                                            onClick={() => { setFilterSystem(s); setVisibleCount(6); setOpenDropdown(null); }} 
+                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${filterSystem === s ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                        >
+                                                            {s}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </>
                             )}
                         </div>
                     </div>
+                    
                     <div className={gridClass}>
                         {visibleData.length === 0 ? <div className="col-span-full text-center py-12 text-gray-400 text-sm font-bold">لا توجد بيانات متاحة حالياً.</div> : visibleData.map(item => {
                             const isVid = isVideoUrl(item.fileUrl);
                             const numericId = toNumericId(item.id);
+                            
                             if (isActivities) {
                                 return (
                                     <div key={item.id} id={`card-${numericId}`} className="optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group" onClick={() => onPreviewSingle(item.fileUrl)}>
@@ -274,27 +408,36 @@
                                     </div>
                                     <div className="flex flex-col flex-grow justify-between min-w-0 py-0.5">
                                         <div>
+                                            {/* تعديل شريط الفرقة / الوظائف */}
                                             <div className="flex items-center justify-between mb-1.5">
-                                                {!hideYearFilter && <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100 truncate max-w-[60%]">{item.year}</span>}
+                                                {type === 'jobs' ? (
+                                                    <span className="text-[9px] bg-cyan-50 text-cyan-700 px-1.5 py-0.5 rounded font-bold border border-cyan-100 truncate max-w-[60%] shadow-sm">
+                                                        <i className="fa-solid fa-briefcase mr-1"></i> وظائف تهمك
+                                                    </span>
+                                                ) : !hideYearFilter ? (
+                                                    <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100 truncate max-w-[60%]">{item.year}</span>
+                                                ) : null}
+                                                
                                                 {item.createdAt && <span className="text-[9px] text-gray-400 font-bold" dir="ltr">{formatDate(item.createdAt)}</span>}
                                             </div>
+                                            
                                             <h4 className="font-bold text-gray-800 leading-snug text-[11px] md:text-xs line-clamp-2" title={item.title}>{item.title}</h4>
                                             {item.description && <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg max-h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">{item.description}</div>}
                                         </div>
                                         <div className="flex flex-wrap gap-1.5 mt-2">
                                             {isA4Card && item.fileUrl && (
                                                 <>
-                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100"><i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}</button>
-                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center"><i className="fa-solid fa-download"></i> تحميل</button>
-                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100 transition hover:bg-blue-100"><i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}</button>
+                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center transition hover:bg-blue-800"><i className="fa-solid fa-download"></i> تحميل</button>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 transition hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
                                                 </>
                                             )}
-                                            {item.link && <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100"><i className="fa-brands fa-youtube"></i> رابط</a>}
+                                            {item.link && <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100 transition hover:bg-red-100"><i className="fa-brands fa-youtube"></i> رابط</a>}
                                             {item.phone && (
                                                 <>
-                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center"><i className="fa-brands fa-whatsapp"></i> واتساب</a>
-                                                    <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center"><i className="fa-solid fa-phone"></i></a>
-                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center transition hover:bg-green-600"><i className="fa-brands fa-whatsapp"></i> واتساب</a>
+                                                    <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center transition hover:bg-gray-900"><i className="fa-solid fa-phone"></i></a>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 transition hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
                                                 </>
                                             )}
                                         </div>
@@ -305,7 +448,7 @@
                     </div>
                     {visibleCount < filtered.length && (
                         <div className="text-center mt-5">
-                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm">عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i></button>
+                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm transition hover:bg-gray-50">عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i></button>
                         </div>
                     )}
                 </div>
@@ -402,8 +545,16 @@
             const[page, setPage] = useState('home');
             const[initialFilters, setInitialFilters] = useState({ year: 'اختار الفرقة', system: 'اختار النظام' });
             const[highlightedItemId, setHighlightedItemId] = useState(null);
-            const[materials, setMaterials] = useState([]);
-            const[schedules, setSchedules] = useState([]);
+            
+            const[materials, setMaterials] = useState(() => {
+                const cached = localStorage.getItem('foc_materials_cache');
+                return cached ? JSON.parse(cached) :[];
+            });
+            const[schedules, setSchedules] = useState(() => {
+                const cached = localStorage.getItem('foc_schedules_cache');
+                return cached ? JSON.parse(cached) :[];
+            });
+            
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const[previewData, setPreviewData] = useState({ items:[], index: -1 });
             const[downloadItem, setDownloadItem] = useState(null); 
@@ -476,9 +627,11 @@
                 try {
                     setIsMobileMenuOpen(false); setHighlightedItemId(null);
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('p', pg); url.searchParams.delete('i'); url.searchParams.delete('page'); url.searchParams.delete('item');
+                    
+                    const url = new URL(getCleanBaseUrl());
+                    url.searchParams.set('p', pg); 
                     window.history.pushState({ page: pg }, '', url.toString());
+                    
                     setPage(pg);
                     setTimeout(() => { const topPos = scrollPositions.current[pg] !== undefined ? scrollPositions.current[pg] : 0; window.scrollTo({ top: topPos, behavior: 'instant' }); }, 0);
                 } catch (err) { setPage(pg); window.scrollTo(0, 0); }
@@ -487,8 +640,7 @@
             const goBack = useCallback(() => {
                 try {
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('p'); url.searchParams.delete('i'); url.searchParams.delete('page'); url.searchParams.delete('item');
+                    const url = new URL(getCleanBaseUrl());
                     window.history.pushState({ page: 'home' }, '', url.toString());
                     setPage('home');
                     setTimeout(() => { const topPos = scrollPositions.current['home'] !== undefined ? scrollPositions.current['home'] : 0; window.scrollTo({ top: topPos, behavior: 'instant' }); }, 0);
@@ -518,18 +670,51 @@
                         setInitialFilters({ year: resolveYear(params.get('y') || params.get('year')), system: resolveSystem(params.get('s') || params.get('system')) });
                         if(itemParam) {
                             setHighlightedItemId(itemParam);
-                            setTimeout(() => { const el = document.getElementById(`card-${itemParam}`); if(el) { const y = el.getBoundingClientRect().top + window.scrollY - 100; window.scrollTo({ top: y, behavior: 'smooth' }); } }, 800);
                         }
-                        window.history.replaceState({ page: pageParam }, document.title, window.location.href);
-                    } else { window.history.replaceState({ page: 'home' }, document.title, window.location.href); }
+                        
+                        const cleanUrl = getCleanBaseUrl() + window.location.search;
+                        window.history.replaceState({ page: pageParam }, document.title, cleanUrl);
+                    } else { window.history.replaceState({ page: 'home' }, document.title, getCleanBaseUrl()); }
                 } catch (err) { console.error("Init Error:", err); }
 
                 const qMat = query(collection(db, 'materials'), orderBy('createdAt', 'desc'), limit(150));
-                const unsubMat = onSnapshot(qMat, { includeMetadataChanges: true }, (snap) => setMaterials(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
-                const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => setSchedules(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
+                const unsubMat = onSnapshot(qMat, { includeMetadataChanges: true }, (snap) => {
+                    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    setMaterials(data);
+                    localStorage.setItem('foc_materials_cache', JSON.stringify(data));
+                });
+                
+                const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => {
+                    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    setSchedules(data);
+                    localStorage.setItem('foc_schedules_cache', JSON.stringify(data));
+                });
 
                 return () => { unsubMat(); unsubSch(); clearTimeout(welcomeTimer); };
             },[]);
+
+            useEffect(() => {
+                if (highlightedItemId && materials.length > 0) {
+                    const item = materials.find(m => toNumericId(m.id) === highlightedItemId);
+                    if (item) {
+                        setInitialFilters({
+                            year: item.year || 'اختار الفرقة',
+                            system: item.studySystem || 'اختار النظام'
+                        });
+                        
+                        setTimeout(() => {
+                            const el = document.getElementById(`card-${highlightedItemId}`);
+                            if(el) {
+                                const y = el.getBoundingClientRect().top + window.scrollY - 100;
+                                window.scrollTo({ top: y, behavior: 'smooth' });
+                                
+                                el.classList.add('card-highlight');
+                                setTimeout(() => el.classList.remove('card-highlight'), 3100);
+                            }
+                        }, 600);
+                    }
+                }
+            }, [materials, highlightedItemId]);
 
             useEffect(() => {
                 const handlePopState = (e) => {
