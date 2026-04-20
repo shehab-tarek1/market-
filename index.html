@@ -7,13 +7,12 @@
     <title>كلية التجارة جامعة الزقازيق | مساهمة طلابيه </title>
 
     <link rel="preconnect" href="https://res.cloudinary.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
 
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="preload" href="/assets/fontawesome/css/all.min.css" as="style">
+<link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -46,7 +45,7 @@
             font-style: normal;
             font-weight: 400;
             src: local('Cairo'), url('./assets/fonts/cairo-regular.woff2') format('woff2');
-            font-display: block; /* يمنع ظهور الخط العادي في البداية */
+            font-display: swap; /* يمنع ظهور الخط العادي في البداية */
         }
 
         @font-face {
@@ -54,7 +53,7 @@
             font-style: normal;
             font-weight: 700;
             src: local('Cairo'), url('./assets/fonts/cairo-bold.woff2') format('woff2');
-            font-display: block;
+            font-display: swap;
         }
 
         @font-face {
@@ -62,7 +61,7 @@
             font-style: normal;
             font-weight: 900;
             src: local('Cairo'), url('./assets/fonts/cairo-black.woff2') format('woff2');
-            font-display: block;
+            font-display: swap;
         }
 
         body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
