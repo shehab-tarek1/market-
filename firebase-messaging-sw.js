@@ -18,17 +18,11 @@ const messaging = firebase.messaging();
 // معالجة الرسائل والموقع مغلق أو في الخلفية
 messaging.onBackgroundMessage(function(payload) {
   console.log('[ServiceWorker] استلام إشعار في الخلفية: ', payload);
-
+  
   const notificationTitle = payload.notification?.title || 'تحديث جديد من التجارة';
   const notificationOptions = {
     body: payload.notification?.body || '',
-    
-    // 👇 الأيقونة الصغيرة للإشعار (يأخذها من الإشعار أو يضع أيقونة الموقع الافتراضية)
-    icon: payload.notification?.icon || './icon-192x192.png',
-    
-    // 👇 السطر الجديد المسؤول عن جلب وعرض "الصورة الكبيرة" داخل الإشعار
-    image: payload.notification?.image || payload.fcmOptions?.image || payload.data?.image,
-    
+    icon: './icon-192x192.png',
     badge: './icon-192x192.png',
     vibrate: [200, 100, 200],
     data: { 
@@ -43,9 +37,9 @@ messaging.onBackgroundMessage(function(payload) {
 // التعامل مع الضغط على الإشعار من قِبل المستخدم (سواء الموبايل مغلق أو مفتوح)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close(); // إغلاق الإشعار بعد الضغط عليه
-
+  
   const urlToOpen = event.notification.data?.url || './';
-
+  
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       // إذا كان الموقع مفتوحاً بالفعل، قم بتبديل التبويب وعمل التركيز عليه (focus)
@@ -67,7 +61,7 @@ self.addEventListener('notificationclick', (event) => {
 // ==========================================
 // 2. كاش الموقع (تسريع الموقع وحل مشكلة الباقة)
 // ==========================================
-const CACHE_NAME = 'commerce-zagazig-v10-image-support'; // 👈 تم رفع الإصدار لتحديث أجهزة كل الطلاب تلقائياً
+const CACHE_NAME = 'commerce-zagazig-v9-speed'; // تم تغيير الاسم لتحديث كاش كل الناس
 
 const APP_SHELL =[
   './',
