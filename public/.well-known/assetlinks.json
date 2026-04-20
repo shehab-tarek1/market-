@@ -2,7 +2,7 @@
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
-        "package_name": "app.vercel.faculty_of_commerce_zag.twa",
-        "sha256_cert_fingerprints": ["9D:4F:DD:0E:95:63:BF:9F:16:3D:1A:67:25:A6:75:91:FE:81:F0:30:BD:82:81:2E:C8:FF:3D:F0:91:1E:60:28"]
+        "package_name": "app.web.faculty_of_commerce_2026.twa",
+        "sha256_cert_fingerprints": ["A0:9A:5D:E2:54:37:1E:D8:19:26:DD:22:5E:19:3E:F9:A0:AC:C9:59:83:61:B8:86:C4:27:16:12:3F:F9:56:74"]
       }
     }]
