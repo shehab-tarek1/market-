@@ -6,7 +6,7 @@
   "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "display_override": [
+  "display_override":[
     "window-controls-overlay",
     "standalone",
     "minimal-ui"
@@ -18,13 +18,13 @@
   "lang": "ar",
   "author": "شهاب طارق صلاح",
   "iarc_rating_id": "e50c4767-7306-47b2-92a0-47a32865768a",
-  "categories": [
+  "categories":[
     "education",
     "social",
     "productivity",
     "utilities"
   ],
-  "icons": [
+  "icons":[
     {
       "src": "icon-192x192.png",
       "sizes": "192x192",
@@ -38,7 +38,7 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
+  "screenshots":[
     {
       "src": "screenshot-mobile.png",
       "sizes": "1080x1920",
@@ -62,10 +62,10 @@
       "title": "title",
       "text": "text",
       "url": "url",
-      "files": [
+      "files":[
         {
           "name": "media",
-          "accept": [
+          "accept":[
             "image/*",
             "audio/*",
             "video/*",
@@ -75,17 +75,17 @@
       ]
     }
   },
-  "file_handlers": [
+  "file_handlers":[
     {
       "action": "./index.html",
       "accept": {
         "application/pdf": [".pdf"],
-        "text/plain": [".txt"],
+        "text/plain":[".txt"],
         "application/msword": [".doc"]
       }
     }
   ],
-  "protocol_handlers": [
+  "protocol_handlers":[
     {
       "protocol": "web+commerce",
       "url": "./index.html?query=%s"
@@ -100,16 +100,40 @@
   "note_taking": {
     "new_note_url": "./index.html?page=new-note"
   },
-  "shortcuts": [
+  "shortcuts":[
     {
       "name": "المحاضرات",
       "url": "./index.html?page=lectures",
-      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
+      "icons":[{"src": "icon-192x192.png", "sizes": "192x192"}]
     },
     {
       "name": "الملاحظات",
       "url": "./index.html?page=notes",
-      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
+      "icons":[{"src": "icon-192x192.png", "sizes": "192x192"}]
+    }
+  ],
+  "scope_extensions":[
+    { "origin": "https://shehab-tarek1.github.io" },
+    { "origin": "https://faculty-of-commerce-zag.netlify.app" },
+    { "origin": "https://faculty-of-commerce-2026.web.app" },
+    { "origin": "https://faculty-of-commerce.netlify.app" },
+    { "origin": "https://faculty-of-commerce-zag.vercel.app" }
+  ],
+  "widgets":[
+    {
+      "name": "جدول المحاضرات",
+      "description": "عرض المحاضرات القادمة والسكاشن لليوم الحالي",
+      "tag": "schedule-widget",
+      "ms_ac_template": "widgets/schedule-template.json",
+      "data": "widgets/schedule-data.json",
+      "type": "application/json",
+      "screenshots":[
+        {
+          "src": "widget-screenshot.png",
+          "sizes": "400x200",
+          "label": "أداة جدول المحاضرات"
+        }
+      ]
     }
   ]
 }
