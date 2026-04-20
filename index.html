@@ -10,11 +10,13 @@
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- تسريع تحميل الخط لمنع القفز -->
+    <link rel="preload" href="./assets/fonts/cairo-bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    
     <link rel="preload" as="image" href="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" fetchpriority="high">
-    <link rel="preload" href="/assets/fontawesome/css/all.min.css" as="style">
-<link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
@@ -41,13 +43,13 @@
     <meta property="og:type" content="website">
 
     <style>
-        /* تعريف خط كايرو محلياً لزيادة السرعة ومنع ظهور الخط العادي */
+        /* تم تغيير swap إلى block لمنع القفز والاهتزاز */
         @font-face {
             font-family: 'Cairo';
             font-style: normal;
             font-weight: 400;
             src: local('Cairo'), url('./assets/fonts/cairo-regular.woff2') format('woff2');
-            font-display: swap; /* يمنع ظهور الخط العادي في البداية */
+            font-display: block; 
         }
 
         @font-face {
@@ -55,7 +57,7 @@
             font-style: normal;
             font-weight: 700;
             src: local('Cairo'), url('./assets/fonts/cairo-bold.woff2') format('woff2');
-            font-display: swap;
+            font-display: block;
         }
 
         @font-face {
@@ -63,7 +65,7 @@
             font-style: normal;
             font-weight: 900;
             src: local('Cairo'), url('./assets/fonts/cairo-black.woff2') format('woff2');
-            font-display: swap;
+            font-display: block;
         }
 
         body { font-family: 'Cairo', sans-serif; background-color: #eef2f6; overflow-x: hidden; }
@@ -74,32 +76,15 @@
         .sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        * { transition: background-color 0.2s, color 0.2s, border-color 0.2s; } 
         .bg-soft-white { background-color: #fafbfc; }
+
+        /* تم إزالة الأنيميشن (transitions و keyframes) بالكامل لسرعة الاستجابة */
         
-        @keyframes highlightPulse {
-            0% { box-shadow: 0 0 0 4px #facc15; transform: scale(1.02); border-color: #facc15; }
-            10% { box-shadow: 0 0 0 6px rgba(250, 204, 21, 0.8); }
-            80% { box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.4); transform: scale(1.01); }
-            100% { box-shadow: 0 0 0 0px rgba(250, 204, 21, 0); transform: scale(1); border-color: #e5e7eb; }
-        }
         .card-highlight {
-            animation: highlightPulse 3s ease-out forwards !important;
+            box-shadow: 0 0 0 4px #facc15;
+            border-color: #facc15;
             position: relative;
             z-index: 10;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes toastSlideIn {
-            from { opacity: 0; transform: translate(-50%, -20px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .toast-animate {
-            animation: toastSlideIn 0.3s ease-out forwards;
         }
     </style>
 </head>
@@ -110,8 +95,10 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
+        // إضافة مكتبة الإشعارات من فايربيز
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+        import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js';
 
         const toNumericId = (str) => {
             if (!str) return '';
@@ -136,6 +123,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
+        
+        // تهيئة خدمة الإشعارات
+        let messaging;
+        try {
+            messaging = getMessaging(app);
+        } catch (e) {
+            console.error("Firebase Messaging not supported:", e);
+        }
 
         const isVideoUrl = (url) => {
             if (!url) return false;
@@ -148,7 +143,7 @@
                 let transform = '/upload/w_300,h_300,c_fill,q_auto:eco,f_auto/';
                 if (type === 'a4') transform = '/upload/w_200,h_280,c_fill,q_auto:eco,f_auto/';
                 if (type === 'slider') transform = '/upload/w_800,h_400,c_fit,q_auto:eco,f_auto/';
-                
+
                 if (url.toLowerCase().endsWith('.pdf')) return url.replace('/upload/', transform).replace(/\.pdf$/i, '.jpg');
                 if (isVideoUrl(url)) return url.replace('/upload/', transform).replace(/\.(mp4|webm|ogg|mov)$/i, '.jpg');
                 return url.replace('/upload/', transform);
@@ -162,8 +157,8 @@
             const icon = type === 'error' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-check-circle' : 'fa-circle-notch fa-spin';
 
             return (
-                <div className={`fixed top-20 lg:top-24 left-1/2 -translate-x-1/2 ${bgClass} text-white px-5 py-2.5 rounded-full shadow-lg text-xs font-bold z-[999] flex items-center gap-3 whitespace-nowrap toast-animate`}>
-                    <i className={`fa-solid ${icon} text-sm`} style={icon.includes('spin') ? {animation: 'fa-spin 2s infinite linear !important'} : {}}></i>
+                <div className={`fixed top-20 lg:top-24 left-1/2 -translate-x-1/2 ${bgClass} text-white px-5 py-2.5 rounded-full shadow-lg text-xs font-bold z-[999] flex items-center gap-3 whitespace-nowrap`}>
+                    <i className={`fa-solid ${icon} text-sm`}></i>
                     {message}
                 </div>
             );
@@ -181,7 +176,7 @@
             if (previewData.items.length === 0) return null;
             const currentItem = previewData.items[previewData.index];
             if (!currentItem || !currentItem.url) return null;
-            
+
             const isPdf = currentItem.url.toLowerCase().includes('.pdf');
             const isVid = isVideoUrl(currentItem.url);
             const pdfViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(currentItem.url)}&embedded=true`;
@@ -199,7 +194,7 @@
                         {isPdf ? <iframe onLoad={() => setIsMediaLoading(false)} src={pdfViewerUrl} className="w-full h-full border-0 bg-white relative z-30" title="PDF Preview"></iframe>
                         : isVid ? <video onLoadedData={() => setIsMediaLoading(false)} src={currentItem.url} controls autoPlay className="max-w-full max-h-full outline-none relative z-30" playsInline></video>
                         : <img onLoad={() => setIsMediaLoading(false)} src={currentItem.url} alt="Preview" className="max-w-full max-h-full object-contain relative z-30" decoding="async" />}
-                        
+
                         {previewData.items.length > 1 && (
                             <>
                                 <button onClick={(e) => { e.stopPropagation(); onNavigate('prev'); }} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center z-50"><i className="fa-solid fa-chevron-left text-lg md:text-xl"></i></button>
@@ -222,7 +217,7 @@
             const[filterYear, setFilterYear] = useState(initialFilters?.year || 'اختار الفرقة');
             const[filterSystem, setFilterSystem] = useState(initialFilters?.system || 'اختار النظام'); 
             const[visibleCount, setVisibleCount] = useState(6);
-            
+
             const[openDropdown, setOpenDropdown] = useState(null);
             const dropdownRef = useRef(null);
 
@@ -239,7 +234,7 @@
             useEffect(() => {
                 if(initialFilters?.year) setFilterYear(initialFilters.year);
                 if(initialFilters?.system) setFilterSystem(initialFilters.system);
-            }, [initialFilters]);
+            },[initialFilters]);
 
             const years = type === 'training' ?['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة', 'كل الفرق'] :['اختار الفرقة', 'الفرقة الأولى', 'الفرقة الثانية', 'الفرقة الثالثة', 'الفرقة الرابعة'];
             const systems =['اختار النظام', 'انتظام', 'انتساب'];
@@ -283,20 +278,19 @@
                 try {
                     const baseUrl = getCleanBaseUrl();
                     const shareUrl = `${baseUrl}?p=${type}&i=${toNumericId(item.id)}`;
-                    
+
                     if (navigator.share) await navigator.share({ title: item.title, text: `شاهد: ${item.title}`, url: shareUrl });
                     else { await navigator.clipboard.writeText(shareUrl); showToast("تم نسخ رابط الملف المصغر", "success"); }
                 } catch (err) { console.error(err); }
             };
 
-            // تعديل روابط المشاركة للقسم لتكون قصيرة
             const handleShareSection = async (e) => {
                 e.stopPropagation();
                 try {
                     const baseUrl = getCleanBaseUrl();
                     const params = new URLSearchParams();
                     params.set('p', type);
-                    
+
                     const getYearCode = (y) => {
                         if(y === 'الفرقة الأولى') return '1';
                         if(y === 'الفرقة الثانية') return '2';
@@ -305,7 +299,7 @@
                         if(y === 'كل الفرق') return 'all';
                         return '';
                     };
-                    
+
                     const getSystemCode = (s) => {
                         if(s === 'انتظام') return 'r';
                         if(s === 'انتساب') return 'a';
@@ -320,9 +314,9 @@
                         const sCode = getSystemCode(filterSystem);
                         if(sCode) params.set('s', sCode);
                     }
-                    
+
                     const shareUrl = `${baseUrl}?${params.toString()}`;
-                    
+
                     if (navigator.share) await navigator.share({ title: title, text: `تصفح ${title} - كلية التجارة`, url: shareUrl });
                     else { await navigator.clipboard.writeText(shareUrl); showToast("تم نسخ رابط القسم بالفلاتر", "success"); }
                 } catch (err) { console.error(err); }
@@ -338,31 +332,31 @@
                             <div className="text-blue-900 text-xs hidden sm:block"><i className={`fa-solid ${icon}`}></i></div>
                             <h2 className="text-xs md:text-sm font-black text-gray-800 whitespace-nowrap">{title}</h2>
                         </div>
-                        
+
                         <div className="flex items-center gap-1.5 flex-shrink-0" ref={dropdownRef}>
-                            <button onClick={handleShareSection} className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-200 w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm transition-colors" title="مشاركة القسم">
+                            <button onClick={handleShareSection} className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-200 w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm" title="مشاركة القسم">
                                 <i className="fa-solid fa-share-nodes text-[10px] md:text-xs"></i>
                             </button>
-                            
+
                             {(!hideYearFilter || showSystemFilter) && (
                                 <>
                                     {!hideYearFilter && (
                                         <div className="relative">
                                             <button 
                                                 onClick={() => setOpenDropdown(openDropdown === 'year' ? null : 'year')}
-                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 transition-colors hover:bg-blue-800"
+                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 hover:bg-blue-800"
                                             >
                                                 {filterYear}
-                                                <i className={`fa-solid fa-chevron-down text-[8px] transition-transform duration-200 ${openDropdown === 'year' ? 'rotate-180' : ''}`}></i>
+                                                <i className={`fa-solid fa-chevron-down text-[8px] ${openDropdown === 'year' ? 'rotate-180' : ''}`}></i>
                                             </button>
-                                            
+
                                             {openDropdown === 'year' && (
-                                                <div className="absolute top-full mt-1 right-0 w-32 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animate-[fadeIn_0.2s_ease-out]" style={{animation: 'fadeIn 0.2s ease-out'}}>
+                                                <div className="absolute top-full mt-1 right-0 w-32 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
                                                     {years.map(y => (
                                                         <div 
                                                             key={y} 
                                                             onClick={() => { setFilterYear(y); setVisibleCount(6); setOpenDropdown(null); }} 
-                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${filterYear === y ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer border-b border-gray-50 last:border-0 ${filterYear === y ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
                                                         >
                                                             {y}
                                                         </div>
@@ -375,19 +369,20 @@
                                         <div className="relative">
                                             <button 
                                                 onClick={() => setOpenDropdown(openDropdown === 'system' ? null : 'system')}
-                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 transition-colors hover:bg-blue-800"
+                                                className="flex items-center gap-1.5 bg-blue-900 text-white text-[9px] md:text-[10px] font-bold rounded-md px-2.5 py-1.5 outline-none cursor-pointer shadow-sm border border-blue-800 hover:bg-blue-800"
                                             >
                                                 {filterSystem}
-                                                <i className={`fa-solid fa-chevron-down text-[8px] transition-transform duration-200 ${openDropdown === 'system' ? 'rotate-180' : ''}`}></i>
+                                                <i className={`fa-solid fa-chevron-down text-[8px] ${openDropdown === 'system' ? 'rotate-180' : ''}`}></i>
                                             </button>
-                                            
+
+                                            {/* تم إصلاح مشكلة خروج القائمة عن الشاشة (تصغير العرض والمحاذاة يمين) */}
                                             {openDropdown === 'system' && (
-                                                <div className="absolute top-full mt-1 left-0 right-auto md:right-0 md:left-auto w-28 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden animate-[fadeIn_0.2s_ease-out]" style={{animation: 'fadeIn 0.2s ease-out'}}>
+                                                <div className="absolute top-full mt-1 right-0 w-24 bg-white rounded-lg shadow-xl border border-gray-100 z-50 overflow-hidden">
                                                     {systems.map(s => (
                                                         <div 
                                                             key={s} 
                                                             onClick={() => { setFilterSystem(s); setVisibleCount(6); setOpenDropdown(null); }} 
-                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer transition-colors border-b border-gray-50 last:border-0 ${filterSystem === s ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                            className={`px-3 py-2 text-[10px] font-bold cursor-pointer border-b border-gray-50 last:border-0 ${filterSystem === s ? 'bg-blue-50 text-blue-900' : 'text-gray-700 hover:bg-gray-50'}`}
                                                         >
                                                             {s}
                                                         </div>
@@ -400,12 +395,12 @@
                             )}
                         </div>
                     </div>
-                    
+
                     <div className={gridClass}>
                         {visibleData.length === 0 ? <div className="col-span-full text-center py-12 text-gray-400 text-sm font-bold">لا توجد بيانات متاحة حالياً.</div> : visibleData.map(item => {
                             const isVid = isVideoUrl(item.fileUrl);
                             const numericId = toNumericId(item.id);
-                            
+
                             if (isActivities) {
                                 return (
                                     <div key={item.id} id={`card-${numericId}`} className="optimized-card break-inside-avoid relative rounded-xl overflow-hidden cursor-pointer shadow-sm border border-gray-200 bg-black group" onClick={() => onPreviewSingle(item.fileUrl)}>
@@ -434,27 +429,27 @@
                                                 ) : !hideYearFilter ? (
                                                     <span className="text-[9px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-bold border border-blue-100 truncate max-w-[60%]">{item.year}</span>
                                                 ) : null}
-                                                
+
                                                 {item.createdAt && <span className="text-[9px] text-gray-400 font-bold" dir="ltr">{formatDate(item.createdAt)}</span>}
                                             </div>
-                                            
+
                                             <h4 className="font-bold text-gray-800 leading-snug text-[11px] md:text-xs line-clamp-2" title={item.title}>{item.title}</h4>
                                             {item.description && <div className="mt-1.5 text-[9px] md:text-[10px] text-gray-600 bg-soft-white border border-gray-100 p-1.5 rounded-lg max-h-16 overflow-y-auto sidebar-scroll whitespace-pre-wrap leading-relaxed">{item.description}</div>}
                                         </div>
                                         <div className="flex flex-wrap gap-1.5 mt-2">
                                             {isA4Card && item.fileUrl && (
                                                 <>
-                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100 transition hover:bg-blue-100"><i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}</button>
-                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center transition hover:bg-blue-800"><i className="fa-solid fa-download"></i> تحميل</button>
-                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 transition hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                    <button onClick={() => onPreviewSingle(item.fileUrl)} className="flex-1 bg-blue-50 text-blue-900 text-[10px] py-1.5 rounded-lg font-bold text-center border border-blue-100 hover:bg-blue-100"><i className={`fa-solid ${isVid ? 'fa-play' : 'fa-eye'}`}></i> {isVid ? 'تشغيل' : 'معاينة'}</button>
+                                                    <button onClick={() => onRequestDownload(item.fileUrl, item.title)} className="flex-1 bg-blue-900 text-white text-[10px] py-1.5 rounded-lg font-bold text-center hover:bg-blue-800"><i className="fa-solid fa-download"></i> تحميل</button>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
                                                 </>
                                             )}
-                                            {item.link && <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100 transition hover:bg-red-100"><i className="fa-brands fa-youtube"></i> رابط</a>}
+                                            {item.link && <a href={item.link} target="_blank" className="flex-1 bg-red-50 text-red-700 text-[10px] py-1.5 rounded-lg font-bold text-center truncate border border-red-100 hover:bg-red-100"><i className="fa-brands fa-youtube"></i> رابط</a>}
                                             {item.phone && (
                                                 <>
-                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center transition hover:bg-green-600"><i className="fa-brands fa-whatsapp"></i> واتساب</a>
-                                                    <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center transition hover:bg-gray-900"><i className="fa-solid fa-phone"></i></a>
-                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 transition hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
+                                                    <a href={formatWhatsApp(item.phone)} target="_blank" className="flex-1 bg-green-500 text-white text-[10px] py-1.5 rounded-lg font-bold text-center hover:bg-green-600"><i className="fa-brands fa-whatsapp"></i> واتساب</a>
+                                                    <a href={`tel:${item.phone}`} className="w-8 bg-gray-800 text-white text-[10px] py-1.5 rounded-lg font-bold text-center flex items-center justify-center hover:bg-gray-900"><i className="fa-solid fa-phone"></i></a>
+                                                    <button onClick={(e) => handleShareCard(e, item)} className="w-8 flex-none bg-purple-50 text-purple-700 py-1.5 rounded-lg font-bold flex items-center justify-center border border-purple-100 hover:bg-purple-100"><i className="fa-solid fa-share-nodes"></i></button>
                                                 </>
                                             )}
                                         </div>
@@ -465,7 +460,7 @@
                     </div>
                     {visibleCount < filtered.length && (
                         <div className="text-center mt-5">
-                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm transition hover:bg-gray-50">عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i></button>
+                            <button onClick={() => setVisibleCount(prev => prev + 12)} className="bg-white text-gray-700 px-6 py-2 rounded-full font-bold text-xs border border-gray-200 shadow-sm hover:bg-gray-50">عرض المزيد <i className="fa-solid fa-angle-down mr-1"></i></button>
                         </div>
                     )}
                 </div>
@@ -562,7 +557,7 @@
             const[page, setPage] = useState('home');
             const[initialFilters, setInitialFilters] = useState({ year: 'اختار الفرقة', system: 'اختار النظام' });
             const[highlightedItemId, setHighlightedItemId] = useState(null);
-            
+
             const[materials, setMaterials] = useState(() => {
                 const cached = localStorage.getItem('foc_materials_cache');
                 return cached ? JSON.parse(cached) :[];
@@ -571,7 +566,7 @@
                 const cached = localStorage.getItem('foc_schedules_cache');
                 return cached ? JSON.parse(cached) :[];
             });
-            
+
             const[isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
             const[previewData, setPreviewData] = useState({ items:[], index: -1 });
             const[downloadItem, setDownloadItem] = useState(null); 
@@ -640,18 +635,16 @@
                 }
             };
 
-        // تنفيذ فوري لضمان سرعة الاستجابة اللحظية
             const navigate = useCallback((pg) => {
                 try {
                     setIsMobileMenuOpen(false); setHighlightedItemId(null);
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
-                    
+
                     const url = new URL(getCleanBaseUrl());
                     url.searchParams.set('p', pg); 
                     window.history.pushState({ page: pg }, '', url.toString());
-                    
+
                     setPage(pg);
-                    // تنفيذ فوري بدون تأخير
                     window.scrollTo({ top: 0, behavior: 'instant' }); 
                 } catch (err) { setPage(pg); window.scrollTo(0, 0); }
             },[]);
@@ -662,14 +655,43 @@
                     const url = new URL(getCleanBaseUrl());
                     window.history.pushState({ page: 'home' }, '', url.toString());
                     setPage('home');
-                    // استعادة مكان التمرير السابق فوراً
                     const topPos = scrollPositions.current['home'] || 0;
                     window.scrollTo({ top: topPos, behavior: 'instant' });
                 } catch (err) { navigate('home'); }
             }, [navigate]);
 
             useEffect(() => {
-                const welcomeTimer = setTimeout(() => showToast("أهلاً بكم في منصتي التعليمية", "success", 3000), 1500);
+                // إصلاح إشعار الترحيب ليظهر مرة واحدة فقط للمستخدم الجديد
+                const hasVisited = localStorage.getItem('foc_has_visited');
+                let welcomeTimer;
+                if (!hasVisited) {
+                    welcomeTimer = setTimeout(() => {
+                        showToast("أهلاً بكم في منصتي التعليمية", "success", 3000);
+                        localStorage.setItem('foc_has_visited', 'true');
+                    }, 1500);
+                }
+
+                // كود طلب الإشعارات من Firebase FCM
+                const requestNotificationPermission = async () => {
+                    try {
+                        if (messaging && 'Notification' in window) {
+                            const permission = await Notification.requestPermission();
+                            if (permission === 'granted') {
+                                // تنبيه: ستحتاج لإنشاء VAPID Key من إعدادات مشروعك في Firebase (Cloud Messaging)
+                                // ووضعه مكان 'YOUR_VAPID_KEY_HERE' لكي يعمل التوكن بنجاح
+                                const token = await getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY_HERE' });
+                                if (token) {
+                                    console.log('FCM Device Token:', token);
+                                    // يمكنك هنا كتابة كود لحفظ التوكن في Firestore في جدول المستخدمين
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Notification permission error:', error);
+                    }
+                };
+                requestNotificationPermission();
+
                 try {
                     const params = new URLSearchParams(window.location.search);
                     const pageParam = params.get('page') || params.get('p');
@@ -692,7 +714,7 @@
                         if(itemParam) {
                             setHighlightedItemId(itemParam);
                         }
-                        
+
                         const cleanUrl = getCleanBaseUrl() + window.location.search;
                         window.history.replaceState({ page: pageParam }, document.title, cleanUrl);
                     } else { window.history.replaceState({ page: 'home' }, document.title, getCleanBaseUrl()); }
@@ -704,17 +726,20 @@
                     setMaterials(data);
                     localStorage.setItem('foc_materials_cache', JSON.stringify(data));
                 });
-                
+
                 const unsubSch = onSnapshot(collection(db, 'schedules'), { includeMetadataChanges: true }, (snap) => {
                     const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     setSchedules(data);
                     localStorage.setItem('foc_schedules_cache', JSON.stringify(data));
                 });
 
-                return () => { unsubMat(); unsubSch(); clearTimeout(welcomeTimer); };
+                return () => { 
+                    unsubMat(); 
+                    unsubSch(); 
+                    if(welcomeTimer) clearTimeout(welcomeTimer); 
+                };
             },[]);
 
-            // منع تكرار تحديد العنصر مرتين (Double Highlight Fix)
             useEffect(() => {
                 if (highlightedItemId && materials.length > 0) {
                     const item = materials.find(m => toNumericId(m.id) === highlightedItemId);
@@ -723,23 +748,23 @@
                             year: item.year || 'اختار الفرقة',
                             system: item.studySystem || 'اختار النظام'
                         });
-                        
+
                         setTimeout(() => {
                             const el = document.getElementById(`card-${highlightedItemId}`);
                             if(el && !el.classList.contains('card-highlight')) {
                                 const y = el.getBoundingClientRect().top + window.scrollY - 100;
                                 window.scrollTo({ top: y, behavior: 'smooth' });
-                                
+
                                 el.classList.add('card-highlight');
                                 setTimeout(() => {
                                     el.classList.remove('card-highlight');
-                                    setHighlightedItemId(null); // يمسح المتغير عشان ميتكررش
+                                    setHighlightedItemId(null); 
                                 }, 3100);
                             }
                         }, 500);
                     }
                 }
-            }, [materials, highlightedItemId]);
+            },[materials, highlightedItemId]);
 
             useEffect(() => {
                 const handlePopState = (e) => {
@@ -824,7 +849,8 @@
                             <div className="space-y-6 md:space-y-8">
                                 <div className="relative rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-56 shadow-lg">
                                     <img src="https://res.cloudinary.com/dsxrjmcxs/image/upload/c_fill,g_auto,w_1364,h_768,q_auto:eco,f_auto/v1776437104/sm5iuilfl3r1fkmg7jyh.png" className="w-full h-full object-cover" alt="الكلية" fetchpriority="high" decoding="sync" />
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-950/85 via-blue-900/45 to-transparent flex flex-col justify-center items-center text-center px-6 md:px-8 text-white">
+                                    {/* تم تعديل التوهج الأزرق إلى لون رمادي داكن أكثر راحة للعين */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-800/60 to-transparent flex flex-col justify-center items-center text-center px-6 md:px-8 text-white">
                                         <h2 className="text-2xl md:text-3xl font-black mb-1 md:mb-2 drop-shadow-lg">بوابة كلية التجارة</h2>
                                         <p className="opacity-90 font-bold text-xs md:text-sm drop-shadow-md">جامعة الزقازيق - شهاب طارق صلاح</p>
                                     </div>
@@ -886,9 +912,6 @@
         const root = createRoot(document.getElementById('root'));
         root.render(<App />);
 
-        // ==========================================
-        // كود تسجيل الـ Service Worker
-        // ==========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js') 
