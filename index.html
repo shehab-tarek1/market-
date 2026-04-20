@@ -885,6 +885,21 @@
 
         const root = createRoot(document.getElementById('root'));
         root.render(<App />);
+
+        // ==========================================
+        // كود تسجيل الـ Service Worker
+        // ==========================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js') 
+                    .then((registration) => {
+                        console.log('[App] تم تسجيل Service Worker بنجاح، النطاق هو: ', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.error('[App] فشل تسجيل Service Worker: ', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
