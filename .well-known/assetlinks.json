@@ -1,8 +1,0 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.web.faculty_of_commerce_2026.twa",
-        "sha256_cert_fingerprints": ["A0:9A:5D:E2:54:37:1E:D8:19:26:DD:22:5E:19:3E:F9:A0:AC:C9:59:83:61:B8:86:C4:27:16:12:3F:F9:56:74"]
-      }
-    }]
