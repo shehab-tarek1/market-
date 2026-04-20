@@ -2,25 +2,29 @@
   "id": "com.commerce.zagazig.app",
   "name": "كلية التجارة جامعة الزقازيق",
   "short_name": "تجارة الزقازيق",
-  "description": "المنصة التعليمية والاجتماعية الشاملة لطلاب كلية التجارة جامعة الزقازيق...",
-  "start_url": "./index.html?source=pwa", 
+  "description": "المنصة التعليمية والاجتماعية الشاملة لطلاب كلية التجارة جامعة الزقازيق",
+  "start_url": "./index.html?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#eef2f6",
   "theme_color": "#1e3a8a",
   "orientation": "portrait-primary",
   "dir": "rtl",
   "lang": "ar",
   "author": "شهاب طارق صلاح",
-  "categories":[
+  "iarc_rating_id": "e50c4767-7306-47b2-92a0-47a32865768a",
+  "categories": [
     "education",
     "social",
     "productivity",
-    "utilities",
-    "books"
+    "utilities"
   ],
-  "icons":[
+  "icons": [
     {
       "src": "icon-192x192.png",
       "sizes": "192x192",
@@ -34,43 +38,78 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots":[
+  "screenshots": [
     {
       "src": "screenshot-mobile.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "الصفحة الرئيسية للتطبيق على الهاتف"
+      "label": "واجهة الهاتف"
     },
     {
       "src": "screenshot-desktop.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "واجهة التطبيق على أجهزة الكمبيوتر"
+      "label": "واجهة الكمبيوتر"
     }
   ],
-  "shortcuts":[
+  "share_target": {
+    "action": "./share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "media",
+          "accept": [
+            "image/*",
+            "audio/*",
+            "video/*",
+            "application/pdf"
+          ]
+        }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "./index.html",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "text/plain": [".txt"],
+        "application/msword": [".doc"]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+commerce",
+      "url": "./index.html?query=%s"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "new_note_url": "./index.html?page=new-note"
+  },
+  "shortcuts": [
     {
       "name": "المحاضرات",
-      "short_name": "المحاضرات",
-      "description": "الذهاب مباشرة إلى قسم المحاضرات",
       "url": "./index.html?page=lectures",
-      "icons":[{ "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "المذكرات",
-      "short_name": "المذكرات",
-      "description": "الذهاب مباشرة إلى قسم المذكرات",
+      "name": "الملاحظات",
       "url": "./index.html?page=notes",
-      "icons":[{ "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
-    },
-    {
-      "name": "الأنشطة",
-      "short_name": "الأنشطة",
-      "description": "استكشاف الأنشطة الطلابية",
-      "url": "./index.html?page=activities",
-      "icons":[{ "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [{ "src": "icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
