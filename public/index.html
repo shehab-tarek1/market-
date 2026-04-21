@@ -87,6 +87,8 @@
         import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        // إضافة Analytics لحل مشكلة الإشعارات الجماعية
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js';
         import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, onSnapshot, query, orderBy, limit, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
         import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-messaging.js';
 
@@ -108,10 +110,13 @@
             projectId: "faculty-of-commerce-2026",
             storageBucket: "faculty-of-commerce-2026.firebasestorage.app",
             messagingSenderId: "350727231766",
-            appId: "1:350727231766:web:b08a0f335e38bfc2e79837"
+            appId: "1:350727231766:web:b08a0f335e38bfc2e79837",
+            measurementId: "G-XXXXXXXXXX" // سيتم التعرف عليه تلقائياً إذا كان موجوداً في فايربيز
         };
 
         const app = initializeApp(firebaseConfig);
+        // تفعيل Analytics هنا
+        const analytics = getAnalytics(app);
         const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
 
         let messaging;
@@ -315,14 +320,15 @@
 
             return (
                 <div className="bg-soft-white p-3 md:p-4 rounded-xl shadow-sm border border-blue-900/10">
-                    <div className="flex flex-nowrap items-center justify-between mb-3 border-b border-gray-100 pb-2 gap-1.5 overflow-x-visible hide-scrollbar relative">
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0"><i className="fa-solid fa-arrow-right text-[10px]"></i></button>
-                            <div className="text-blue-900 text-xs hidden sm:block"><i className={`fa-solid ${icon}`}></i></div>
-                            <h2 className="text-xs md:text-sm font-black text-gray-800 whitespace-nowrap">{title}</h2>
+                    {/* تم التعديل هنا لحل مشكلة خروج العنوان عن الشاشة ونزوله لسطرين */}
+                    <div className="flex items-start justify-between mb-3 border-b border-gray-100 pb-2 gap-2 relative">
+                        <div className="flex items-start gap-1.5 flex-1 min-w-0 pt-0.5">
+                            <button onClick={onBack} className="text-gray-500 hover:text-blue-900 bg-gray-100 hover:bg-gray-200 w-6 h-6 md:w-7 md:h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"><i className="fa-solid fa-arrow-right text-[10px]"></i></button>
+                            <div className="text-blue-900 text-xs hidden sm:block mt-1"><i className={`fa-solid ${icon}`}></i></div>
+                            <h2 className="text-xs md:text-sm font-black text-gray-800 leading-snug break-words whitespace-normal">{title}</h2>
                         </div>
 
-                        <div className="flex items-center gap-1.5 flex-shrink-0" ref={dropdownRef}>
+                        <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5" ref={dropdownRef}>
                             <button onClick={handleShareSection} className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-200 w-6 h-6 md:w-7 md:h-7 rounded-md flex items-center justify-center flex-shrink-0 shadow-sm" title="مشاركة القسم">
                                 <i className="fa-solid fa-share-nodes text-[10px] md:text-xs"></i>
                             </button>
@@ -571,9 +577,6 @@
                 if (duration) setTimeout(() => setToast({ message: '', type: '' }), duration);
             },[]);
 
-            // ===============================================
-            // التعديل الأول: دالة طلب الإذن الذكية والتوثيق
-            // ===============================================
             const requestNotificationPermission = useCallback(async () => {
                 try {
                     setIsMobileMenuOpen(false); 
@@ -585,16 +588,14 @@
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         showToast("جاري تفعيل الإشعارات وتأمين الاتصال...", "info", 4000);
-
-                        // 1. تسجيل السيرفر وركر أولاً للحصول عليه (يحل مشكلة فشل التسجيل)
+                        
                         const swRegistration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-
-                        // 2. تمرير السيرفر وركر لتوليد التوكن
+                        
                         const token = await getToken(messaging, { 
                             vapidKey: 'BE3EmhXjZXjrDdn4duFuZ7cFpHppvPGgCI-X1M8VCPgSlBuHRg-BD6cxnvOD8SE3HzC33dBgVwCOzpEW1zKbvgk',
                             serviceWorkerRegistration: swRegistration 
                         });
-
+                        
                         if (token) {
                             console.log('FCM Device Token:', token);
                             const tokenRef = doc(db, 'fcm_tokens', token);
@@ -603,11 +604,10 @@
                                 platform: navigator.userAgent,
                                 createdAt: serverTimestamp()
                             }, { merge: true });
-
+                            
                             showToast("تم تفعيل الإشعارات بنجاح 🎉", "success");
                         }
                     } else if (permission === 'denied') {
-                        // إظهار رسالة توجيهية للمستخدم إذا كان قد رفضها مسبقاً
                         showToast("تم رفض الإشعارات مسبقاً! يرجى الضغط على علامة القفل (🔒) أعلى المتصفح والسماح للإشعارات.", "error", 6000);
                     } else {
                         showToast("تم رفض إذن الإشعارات من قبل جهازك", "error");
@@ -618,16 +618,12 @@
                 }
             },[showToast]);
 
-            // ===============================================
-            // التعديل الثاني: استقبال الإشعارات والموقع مفتوح
-            // ===============================================
             useEffect(() => {
                 if (messaging) {
                     const unsubscribe = onMessage(messaging, (payload) => {
                         console.log('رسالة في الواجهة:', payload);
                         const title = payload.notification?.title || 'إشعار جديد';
                         const body = payload.notification?.body || '';
-                        // عرض إشعار Toast داخل الموقع
                         showToast(`🔔 ${title}: ${body}`, "success", 6000);
                     });
                     return () => unsubscribe();
@@ -686,9 +682,15 @@
                 }
             };
 
+            // تعديل دالة التنقل لتصفير الفلتر
             const navigate = useCallback((pg) => {
                 try {
-                    setIsMobileMenuOpen(false); setHighlightedItemId(null);
+                    setIsMobileMenuOpen(false); 
+                    setHighlightedItemId(null);
+                    
+                    // تصفير الفلاتر عند الانتقال لأي صفحة
+                    setInitialFilters({ year: 'اختار الفرقة', system: 'اختار النظام' });
+
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
 
                     const url = new URL(getCleanBaseUrl());
@@ -700,8 +702,12 @@
                 } catch (err) { setPage(pg); window.scrollTo(0, 0); }
             },[]);
 
+            // تعديل دالة الرجوع لتصفير الفلتر
             const goBack = useCallback(() => {
                 try {
+                    // تصفير الفلاتر عند الرجوع
+                    setInitialFilters({ year: 'اختار الفرقة', system: 'اختار النظام' });
+
                     if (currentPageRef.current) scrollPositions.current[currentPageRef.current] = window.scrollY;
                     const url = new URL(getCleanBaseUrl());
                     window.history.pushState({ page: 'home' }, '', url.toString());
@@ -721,9 +727,6 @@
                     }, 1500);
                 }
 
-                // ===============================================
-                // التعديل الثالث: تحديث التوكن في الخلفية بشكل صامت وبدون أخطاء
-                // ===============================================
                 if ('Notification' in window && Notification.permission === 'granted' && messaging) {
                     const fetchTokenSilently = async () => {
                         try {
@@ -888,11 +891,11 @@
                             <SidebarBtn icon="fa-map-location" label="دليل الطالب" active={page==='guide'} onClick={() => navigate('guide')} />
                             <SidebarBtn icon="fa-circle-info" label="من نحن" active={page==='about'} onClick={() => navigate('about')} />
                             <hr className="my-1 border-gray-200 w-full" />
-
+                            
                             <button onClick={requestNotificationPermission} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-sm mt-1 border border-blue-700 hover:from-blue-700 hover:to-blue-900">
                                 <i className="fa-solid fa-bell"></i> تفعيل الإشعارات والتنبيهات
                             </button>
-
+                            
                             <button onClick={handleCleanSite} className="flex items-center justify-center gap-1.5 w-full p-2 rounded-lg font-black text-[10px] md:text-xs bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-sm mt-1 border border-teal-600 hover:from-emerald-500 hover:to-teal-600"><i className="fa-solid fa-broom"></i> تنظيف الموقع</button>
                         </div>
                     </div>
