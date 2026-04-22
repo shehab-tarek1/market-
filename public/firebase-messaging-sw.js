@@ -18,7 +18,7 @@ const messaging = firebase.messaging();
 // معالجة الرسائل والموقع مغلق أو في الخلفية
 messaging.onBackgroundMessage(function(payload) {
   console.log('[ServiceWorker] استلام إشعار في الخلفية: ', payload);
-  
+
   const notificationTitle = payload.notification?.title || 'تحديث جديد من التجارة';
   const notificationOptions = {
     body: payload.notification?.body || '',
@@ -37,9 +37,9 @@ messaging.onBackgroundMessage(function(payload) {
 // التعامل مع الضغط على الإشعار من قِبل المستخدم (سواء الموبايل مغلق أو مفتوح)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close(); // إغلاق الإشعار بعد الضغط عليه
-  
+
   const urlToOpen = event.notification.data?.url || './';
-  
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       // إذا كان الموقع مفتوحاً بالفعل، قم بتبديل التبويب وعمل التركيز عليه (focus)
